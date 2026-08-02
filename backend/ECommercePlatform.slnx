@@ -1,0 +1,36 @@
+<Solution>
+  <Folder Name="/src/">
+    <Project Path="src/BuildingBlocks/ECommercePlatform.BuildingBlocks.Application/ECommercePlatform.BuildingBlocks.Application.csproj" />
+    <Project Path="src/BuildingBlocks/ECommercePlatform.BuildingBlocks.Infrastructure/ECommercePlatform.BuildingBlocks.Infrastructure.csproj" />
+    <Project Path="src/ECommercePlatform.Api/ECommercePlatform.Api.csproj" />
+    <Project Path="src/ECommercePlatform.SharedKernel/ECommercePlatform.SharedKernel.csproj" />
+    <Project Path="src/Modules/Cart/ECommercePlatform.Modules.Cart.Application/ECommercePlatform.Modules.Cart.Application.csproj" />
+    <Project Path="src/Modules/Cart/ECommercePlatform.Modules.Cart.Domain/ECommercePlatform.Modules.Cart.Domain.csproj" />
+    <Project Path="src/Modules/Cart/ECommercePlatform.Modules.Cart.Infrastructure/ECommercePlatform.Modules.Cart.Infrastructure.csproj" />
+    <Project Path="src/Modules/Catalog/ECommercePlatform.Modules.Catalog.Application/ECommercePlatform.Modules.Catalog.Application.csproj" />
+    <Project Path="src/Modules/Catalog/ECommercePlatform.Modules.Catalog.Domain/ECommercePlatform.Modules.Catalog.Domain.csproj" />
+    <Project Path="src/Modules/Catalog/ECommercePlatform.Modules.Catalog.Infrastructure/ECommercePlatform.Modules.Catalog.Infrastructure.csproj" />
+    <Project Path="src/Modules/Identity/ECommercePlatform.Modules.Identity.Application/ECommercePlatform.Modules.Identity.Application.csproj" />
+    <Project Path="src/Modules/Identity/ECommercePlatform.Modules.Identity.Domain/ECommercePlatform.Modules.Identity.Domain.csproj" />
+    <Project Path="src/Modules/Identity/ECommercePlatform.Modules.Identity.Infrastructure/ECommercePlatform.Modules.Identity.Infrastructure.csproj" />
+    <Project Path="src/Modules/Inventory/ECommercePlatform.Modules.Inventory.Application/ECommercePlatform.Modules.Inventory.Application.csproj" />
+    <Project Path="src/Modules/Inventory/ECommercePlatform.Modules.Inventory.Domain/ECommercePlatform.Modules.Inventory.Domain.csproj" />
+    <Project Path="src/Modules/Inventory/ECommercePlatform.Modules.Inventory.Infrastructure/ECommercePlatform.Modules.Inventory.Infrastructure.csproj" />
+    <Project Path="src/Modules/Order/ECommercePlatform.Modules.Order.Application/ECommercePlatform.Modules.Order.Application.csproj" />
+    <Project Path="src/Modules/Order/ECommercePlatform.Modules.Order.Domain/ECommercePlatform.Modules.Order.Domain.csproj" />
+    <Project Path="src/Modules/Order/ECommercePlatform.Modules.Order.Infrastructure/ECommercePlatform.Modules.Order.Infrastructure.csproj" />
+    <Project Path="src/Modules/Payment/ECommercePlatform.Modules.Payment.Application/ECommercePlatform.Modules.Payment.Application.csproj" />
+    <Project Path="src/Modules/Payment/ECommercePlatform.Modules.Payment.Domain/ECommercePlatform.Modules.Payment.Domain.csproj" />
+    <Project Path="src/Modules/Payment/ECommercePlatform.Modules.Payment.Infrastructure/ECommercePlatform.Modules.Payment.Infrastructure.csproj" />
+    <Project Path="src/Modules/Promotion/ECommercePlatform.Modules.Promotion.Application/ECommercePlatform.Modules.Promotion.Application.csproj" />
+    <Project Path="src/Modules/Promotion/ECommercePlatform.Modules.Promotion.Domain/ECommercePlatform.Modules.Promotion.Domain.csproj" />
+    <Project Path="src/Modules/Promotion/ECommercePlatform.Modules.Promotion.Infrastructure/ECommercePlatform.Modules.Promotion.Infrastructure.csproj" />
+    <Project Path="src/Modules/Review/ECommercePlatform.Modules.Review.Application/ECommercePlatform.Modules.Review.Application.csproj" />
+    <Project Path="src/Modules/Review/ECommercePlatform.Modules.Review.Domain/ECommercePlatform.Modules.Review.Domain.csproj" />
+    <Project Path="src/Modules/Review/ECommercePlatform.Modules.Review.Infrastructure/ECommercePlatform.Modules.Review.Infrastructure.csproj" />
+    <Project Path="src/Modules/Shipping/ECommercePlatform.Modules.Shipping.Application/ECommercePlatform.Modules.Shipping.Application.csproj" />
+    <Project Path="src/Modules/Shipping/ECommercePlatform.Modules.Shipping.Domain/ECommercePlatform.Modules.Shipping.Domain.csproj" />
+    <Project Path="src/Modules/Shipping/ECommercePlatform.Modules.Shipping.Infrastructure/ECommercePlatform.Modules.Shipping.Infrastructure.csproj" />
+    <Project Path="tests/ECommercePlatform.Modules.Identity.UnitTests/ECommercePlatform.Modules.Identity.UnitTests.csproj" />
+  </Folder>
+</Solution>

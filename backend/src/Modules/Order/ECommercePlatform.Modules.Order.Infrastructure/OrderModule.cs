@@ -1,0 +1,35 @@
+using ECommercePlatform.BuildingBlocks.Infrastructure;
+using ECommercePlatform.BuildingBlocks.Infrastructure.Outbox;
+using ECommercePlatform.Modules.Order.Application;
+using ECommercePlatform.Modules.Order.Infrastructure.Persistence;
+using FluentValidation;
+using Microsoft.EntityFrameworkCore;
+using Microsoft.Extensions.Configuration;
+using Microsoft.Extensions.DependencyInjection;
+
+namespace ECommercePlatform.Modules.Order.Infrastructure;
+
+public static class OrderModule
+{
+    public static IServiceCollection AddOrderModule(this IServiceCollection services, IConfiguration configuration)
+    {
+        var connectionString = configuration.GetConnectionString("Default")
+            ?? throw new InvalidOperationException("'Default' connection string is not configured.");
+
+        services.AddDomainEventOutbox();
+
+        services.AddDbContext<OrderDbContext>((sp, options) =>
+            options
+                .UseNpgsql(connectionString, npgsqlOptions =>
+                    npgsqlOptions.MigrationsHistoryTable("__ef_migrations_history", OrderDbContext.Schema))
+                .UseSnakeCaseNamingConvention()
+                .AddInterceptors(sp.GetRequiredService<OutboxWritingInterceptor>()));
+
+        services.AddMediatR(cfg => cfg.RegisterServicesFromAssembly(typeof(OrderApplicationAssemblyMarker).Assembly));
+        services.AddValidatorsFromAssembly(typeof(OrderApplicationAssemblyMarker).Assembly);
+
+        services.AddOutboxProcessor<OrderDbContext>();
+
+        return services;
+    }
+}

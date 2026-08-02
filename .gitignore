@@ -1,0 +1,27 @@
+## .NET
+bin/
+obj/
+*.user
+.vs/
+
+## Environment
+.env
+
+## Rider / VS Code
+.idea/
+.vscode/
+
+## Claude Code (personal/local overrides)
+.claude/settings.local.json
+
+## OS
+.DS_Store
+Thumbs.db
+
+## Logs
+*.log
+
+## Node (frontend, ileride)
+node_modules/
+dist/
+build/
