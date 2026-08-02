@@ -51,6 +51,10 @@ builder.Services
     .AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
     .AddJwtBearer(options =>
     {
+        // Keep claim types exactly as issued ("sub" stays "sub") instead of the legacy
+        // ClaimTypes.NameIdentifier remapping, so controllers can read JwtRegisteredClaimNames.Sub directly.
+        options.MapInboundClaims = false;
+
         options.TokenValidationParameters = new TokenValidationParameters
         {
             ValidateIssuer = true,

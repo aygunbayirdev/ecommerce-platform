@@ -1,3 +1,4 @@
+using ECommercePlatform.BuildingBlocks.Infrastructure.Persistence;
 using Microsoft.EntityFrameworkCore;
 
 namespace ECommercePlatform.Modules.Payment.Infrastructure.Persistence;
@@ -10,6 +11,7 @@ public sealed class PaymentDbContext(DbContextOptions<PaymentDbContext> options)
     {
         modelBuilder.HasDefaultSchema(Schema);
         modelBuilder.ApplyConfigurationsFromAssembly(typeof(PaymentDbContext).Assembly);
+        modelBuilder.ApplyClientGeneratedKeys();
 
         base.OnModelCreating(modelBuilder);
     }

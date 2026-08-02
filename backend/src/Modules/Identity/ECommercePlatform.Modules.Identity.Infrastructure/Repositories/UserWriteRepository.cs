@@ -13,6 +13,9 @@ internal sealed class UserWriteRepository(IdentityDbContext dbContext) : IUserWr
     public Task<User?> GetByIdAsync(Guid id, CancellationToken cancellationToken)
         => dbContext.Users.FirstOrDefaultAsync(u => u.Id == id, cancellationToken);
 
+    public Task<User?> GetByIdWithAddressesAsync(Guid id, CancellationToken cancellationToken)
+        => dbContext.Users.Include(u => u.Addresses).FirstOrDefaultAsync(u => u.Id == id, cancellationToken);
+
     public Task<User?> GetByEmailAsync(string email, CancellationToken cancellationToken)
         => dbContext.Users.FirstOrDefaultAsync(u => u.Email == email.Trim().ToLower(), cancellationToken);
 

@@ -28,7 +28,8 @@ public static class PaymentModule
         services.AddMediatR(cfg => cfg.RegisterServicesFromAssembly(typeof(PaymentApplicationAssemblyMarker).Assembly));
         services.AddValidatorsFromAssembly(typeof(PaymentApplicationAssemblyMarker).Assembly);
 
-        services.AddOutboxProcessor<PaymentDbContext>();
+        // No AddOutboxProcessor<PaymentDbContext>() yet — this module has no entities/domain events
+        // to process. Register it once the module raises its first domain event (see TASKS.md).
 
         return services;
     }

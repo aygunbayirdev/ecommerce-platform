@@ -31,6 +31,7 @@ public static class IdentityModule
         services.AddScoped<IUserWriteRepository, UserWriteRepository>();
         services.AddScoped<IUserReadRepository, UserReadRepository>();
         services.AddScoped<IRefreshTokenWriteRepository, RefreshTokenWriteRepository>();
+        services.AddScoped<IAddressReadRepository, AddressReadRepository>();
         services.AddSingleton<IPasswordHasher, PasswordHasherAdapter>();
         services.AddScoped<ITokenGenerator, JwtTokenGenerator>();
 

@@ -28,7 +28,8 @@ public static class ReviewModule
         services.AddMediatR(cfg => cfg.RegisterServicesFromAssembly(typeof(ReviewApplicationAssemblyMarker).Assembly));
         services.AddValidatorsFromAssembly(typeof(ReviewApplicationAssemblyMarker).Assembly);
 
-        services.AddOutboxProcessor<ReviewDbContext>();
+        // No AddOutboxProcessor<ReviewDbContext>() yet — this module has no entities/domain events
+        // to process. Register it once the module raises its first domain event (see TASKS.md).
 
         return services;
     }

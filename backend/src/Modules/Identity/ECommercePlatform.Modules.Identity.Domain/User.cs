@@ -71,4 +71,85 @@ public sealed class User : BaseEntity
         IsActive = false;
         UpdatedAtUtc = DateTime.UtcNow;
     }
+
+    public Address AddAddress(
+        string title,
+        string recipientName,
+        string phoneNumber,
+        string city,
+        string district,
+        string fullAddressLine,
+        string postalCode,
+        bool isDefault)
+    {
+        var address = Address.Create(Id, title, recipientName, phoneNumber, city, district, fullAddressLine, postalCode);
+        _addresses.Add(address);
+
+        if (isDefault || _addresses.Count == 1)
+        {
+            SetDefaultAddress(address.Id);
+        }
+
+        return address;
+    }
+
+    public Result UpdateAddress(
+        Guid addressId,
+        string title,
+        string recipientName,
+        string phoneNumber,
+        string city,
+        string district,
+        string fullAddressLine,
+        string postalCode)
+    {
+        var address = _addresses.FirstOrDefault(a => a.Id == addressId);
+
+        if (address is null)
+        {
+            return Result.Failure(Error.NotFound("Users.AddressNotFound", "Adres bulunamadı."));
+        }
+
+        address.UpdateDetails(title, recipientName, phoneNumber, city, district, fullAddressLine, postalCode);
+
+        return Result.Success();
+    }
+
+    public Result RemoveAddress(Guid addressId)
+    {
+        var address = _addresses.FirstOrDefault(a => a.Id == addressId);
+
+        if (address is null)
+        {
+            return Result.Failure(Error.NotFound("Users.AddressNotFound", "Adres bulunamadı."));
+        }
+
+        _addresses.Remove(address);
+
+        if (address.IsDefault && _addresses.Count > 0)
+        {
+            SetDefaultAddress(_addresses[0].Id);
+        }
+
+        return Result.Success();
+    }
+
+    public Result SetDefaultAddress(Guid addressId)
+    {
+        var target = _addresses.FirstOrDefault(a => a.Id == addressId);
+
+        if (target is null)
+        {
+            return Result.Failure(Error.NotFound("Users.AddressNotFound", "Adres bulunamadı."));
+        }
+
+        foreach (var address in _addresses.Where(a => a.IsDefault && a.Id != addressId))
+        {
+            address.UnmarkAsDefault();
+        }
+
+        target.MarkAsDefault();
+
+        return Result.Success();
+    }
 }

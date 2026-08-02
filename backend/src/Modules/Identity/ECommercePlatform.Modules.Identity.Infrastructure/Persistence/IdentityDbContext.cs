@@ -1,4 +1,5 @@
 using ECommercePlatform.BuildingBlocks.Infrastructure.Outbox;
+using ECommercePlatform.BuildingBlocks.Infrastructure.Persistence;
 using ECommercePlatform.Modules.Identity.Domain;
 using Microsoft.EntityFrameworkCore;
 
@@ -20,6 +21,7 @@ public sealed class IdentityDbContext(DbContextOptions<IdentityDbContext> option
     {
         modelBuilder.HasDefaultSchema(Schema);
         modelBuilder.ApplyConfigurationsFromAssembly(typeof(IdentityDbContext).Assembly);
+        modelBuilder.ApplyClientGeneratedKeys();
 
         base.OnModelCreating(modelBuilder);
     }

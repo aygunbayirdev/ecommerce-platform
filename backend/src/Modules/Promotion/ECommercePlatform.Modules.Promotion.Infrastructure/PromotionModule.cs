@@ -28,7 +28,8 @@ public static class PromotionModule
         services.AddMediatR(cfg => cfg.RegisterServicesFromAssembly(typeof(PromotionApplicationAssemblyMarker).Assembly));
         services.AddValidatorsFromAssembly(typeof(PromotionApplicationAssemblyMarker).Assembly);
 
-        services.AddOutboxProcessor<PromotionDbContext>();
+        // No AddOutboxProcessor<PromotionDbContext>() yet — this module has no entities/domain events
+        // to process. Register it once the module raises its first domain event (see TASKS.md).
 
         return services;
     }

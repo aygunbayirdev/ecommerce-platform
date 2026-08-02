@@ -1,3 +1,4 @@
+using ECommercePlatform.BuildingBlocks.Infrastructure.Persistence;
 using Microsoft.EntityFrameworkCore;
 
 namespace ECommercePlatform.Modules.Shipping.Infrastructure.Persistence;
@@ -10,6 +11,7 @@ public sealed class ShippingDbContext(DbContextOptions<ShippingDbContext> option
     {
         modelBuilder.HasDefaultSchema(Schema);
         modelBuilder.ApplyConfigurationsFromAssembly(typeof(ShippingDbContext).Assembly);
+        modelBuilder.ApplyClientGeneratedKeys();
 
         base.OnModelCreating(modelBuilder);
     }

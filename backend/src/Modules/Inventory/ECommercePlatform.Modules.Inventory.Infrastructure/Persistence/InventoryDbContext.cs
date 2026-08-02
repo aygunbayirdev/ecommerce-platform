@@ -1,3 +1,4 @@
+using ECommercePlatform.BuildingBlocks.Infrastructure.Persistence;
 using Microsoft.EntityFrameworkCore;
 
 namespace ECommercePlatform.Modules.Inventory.Infrastructure.Persistence;
@@ -10,6 +11,7 @@ public sealed class InventoryDbContext(DbContextOptions<InventoryDbContext> opti
     {
         modelBuilder.HasDefaultSchema(Schema);
         modelBuilder.ApplyConfigurationsFromAssembly(typeof(InventoryDbContext).Assembly);
+        modelBuilder.ApplyClientGeneratedKeys();
 
         base.OnModelCreating(modelBuilder);
     }

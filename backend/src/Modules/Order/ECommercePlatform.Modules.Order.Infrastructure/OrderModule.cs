@@ -28,7 +28,8 @@ public static class OrderModule
         services.AddMediatR(cfg => cfg.RegisterServicesFromAssembly(typeof(OrderApplicationAssemblyMarker).Assembly));
         services.AddValidatorsFromAssembly(typeof(OrderApplicationAssemblyMarker).Assembly);
 
-        services.AddOutboxProcessor<OrderDbContext>();
+        // No AddOutboxProcessor<OrderDbContext>() yet — this module has no entities/domain events
+        // to process. Register it once the module raises its first domain event (see TASKS.md).
 
         return services;
     }

@@ -28,7 +28,8 @@ public static class InventoryModule
         services.AddMediatR(cfg => cfg.RegisterServicesFromAssembly(typeof(InventoryApplicationAssemblyMarker).Assembly));
         services.AddValidatorsFromAssembly(typeof(InventoryApplicationAssemblyMarker).Assembly);
 
-        services.AddOutboxProcessor<InventoryDbContext>();
+        // No AddOutboxProcessor<InventoryDbContext>() yet — this module has no entities/domain events
+        // to process. Register it once the module raises its first domain event (see TASKS.md).
 
         return services;
     }

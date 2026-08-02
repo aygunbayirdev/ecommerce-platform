@@ -1,3 +1,4 @@
+using ECommercePlatform.BuildingBlocks.Infrastructure.Persistence;
 using Microsoft.EntityFrameworkCore;
 
 namespace ECommercePlatform.Modules.Order.Infrastructure.Persistence;
@@ -10,6 +11,7 @@ public sealed class OrderDbContext(DbContextOptions<OrderDbContext> options) : D
     {
         modelBuilder.HasDefaultSchema(Schema);
         modelBuilder.ApplyConfigurationsFromAssembly(typeof(OrderDbContext).Assembly);
+        modelBuilder.ApplyClientGeneratedKeys();
 
         base.OnModelCreating(modelBuilder);
     }
