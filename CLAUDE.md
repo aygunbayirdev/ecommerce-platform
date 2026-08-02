@@ -1,6 +1,14 @@
-# E-Ticaret Platformu — Proje Başlangıç Notları
+# E-Ticaret Platformu — Proje Notları
 
-Bu dosya henüz kod içermeyen bir projenin başlangıç kararlarını içerir. Bu kararlar başka bir konuşmada (WMS/Depo Yönetim Sistemi projesiyle ilgili konuşma çok uzadığı için) alındı, buradan devam edilecek.
+Bu dosya projenin tüm mimari kararlarını, gerekçelerini ve kod yazarken uyulacak teknik konvansiyonları içerir. Amaç: bu konuşma geçmişi silinse veya haftalar/aylar sonra yeni bir konuşmada devam edilse bile, hiçbir bağlam kaybı olmadan kaldığı yerden devam edilebilmesi.
+
+**Güncel durum ve sıradaki iş için:** [TASKS.md](./TASKS.md) — fazlara ayrılmış, MVP'ye kadar olan tüm iş listesi orada. Bu dosya (CLAUDE.md) *neden*i, TASKS.md *ne*yi ve *sırayı* anlatır.
+
+**Repo:** https://github.com/aygunbayirdev/ecommerce-platform (public)
+
+## Şu An Neredeyiz
+
+Faz 1 tamamlandı: .NET 10 modüler monolith iskeleti kuruldu (9 modül, hepsi derleniyor ve DI'a kayıtlı), **Identity modülü uçtan uca tam** (kayıt, JWT giriş, refresh token, kullanıcı sorgulama) — migration Postgres'e uygulandı, unit testler geçiyor, GitHub'a push edildi. Sıradaki iş **Faz 2**: Identity'nin adres defteri CQRS'i, ardından Catalog modülü. Detay ve tam sıralama için [TASKS.md](./TASKS.md).
 
 ## Geliştirme Döngüsü
 
@@ -9,15 +17,14 @@ Her görev için: **Planla → Implement et → Testleri güncelle/yaz → Dök�
 Kurallar:
 - **Commit mesajları her zaman İngilizce yazılır** (proje dili Türkçe olsa da).
 - Commit mesajlarına `Co-Authored-By` gibi Claude/Anthropic referansı eklenmez.
-
-**Not:** `TASKS.md` henüz yok — bu proje üzerinde çalışılacak ilk konuşmada birlikte planlanıp oluşturulacak.
+- Büyük/çok dosyalı işler (yeni modül gibi) önce plan olarak sunulur, onay alındıktan sonra koda geçilir.
 
 ## Amaç ve Bağlam
 
-- Modüler monolith / Clean Architecture gibi kavramlar WMS projesinde uygulandı (bkz. `WarehouseManagementSystem/CLAUDE.md`) — bu proje kapsamında mikroservis mimarisi yeni öğreniliyor.
+- Modüler monolith / Clean Architecture gibi kavramlar WMS projesinde uygulandı (bkz. `WarehouseManagementSystem/CLAUDE.md`, yerel yol: `C:\Users\turko\OneDrive\Desktop\WarehouseManagementSystem`) — bu proje kapsamında mikroservis mimarisi yeni öğreniliyor.
 - Portföy projelerinin "gösteriş için yapılmış" değil, **gerekçeli ve savunulabilir** mimari kararlar içermesi önemli görülüyor.
 - Bu proje, WMS'in (modüler monolith) tamamlayıcısı olarak tasarlandı: WMS "iyi yapılmış bir monolith" hikâyesini anlatıyor, bu proje "mikroservise ne zaman/neden geçilir" hikâyesini anlatacak. İkisi birlikte "hangi mimariyi ne zaman seçeceğini biliyorum" anlatısını kuruyor.
-- Kullanıcı mikroservis mimarisini **hiç bilmiyor**, öğrenmek istiyor. İki kriteri var:
+- Kullanıcı mikroservis mimarisini **hiç bilmiyordu**, öğreniyor. İki kriteri var:
   1. **Hazmedilebilirlik**: Seviyesine göre, kafası karışmadan öğrenmek istiyor.
   2. **Savunulabilirlik**: Bir işveren projeye baktığında "bu adam saçmalamış" dememeli — mimari kararların gerçek bir gerekçesi olmalı.
 
@@ -25,55 +32,120 @@ Kurallar:
 
 ### 1. Domain: E-Ticaret
 
-Bankacılık değil e-ticaret seçildi çünkü bankacılık domaini gereksiz regülasyon/compliance karmaşıklığı ekliyor ve asıl öğrenilmek istenen şeyin (mikroservis mimarisi) üzerini örtüyor. E-ticaret hem daha standart/iyi belgelenmiş bir domain hem de mikroservis için doğal servis sınırları sunuyor (Katalog, Sepet, Sipariş, Ödeme, Kargo, Stok gibi).
+Bankacılık değil e-ticaret seçildi çünkü bankacılık domaini gereksiz regülasyon/compliance karmaşıklığı ekliyor ve asıl öğrenilmek istenen şeyin (mikroservis mimarisi) üzerini örtüyor. E-ticaret hem daha standart/iyi belgelenmiş bir domain hem de mikroservis için doğal servis sınırları sunuyor.
 
 ### 2. Yaklaşım: Modüler Monolith + Tek Servis Çıkarma (Strangler Fig)
 
 **Sıfırdan çoklu mikroservis mimarisi KURULMAYACAK.** Bunun yerine:
 
-1. Proje önce WMS'teki gibi bir **modüler monolith** olarak kurulacak (Clean Architecture, modül başına şema, CQRS — WMS'teki kanıtlanmış desen tekrar kullanılacak, kullanıcı bu deseni zaten biliyor, yeni öğrenilecek şey burada değil).
-2. Sonra **tek bir modül** (bkz. aşağıda) gerçek, ayrı bir mikroservise çıkarılacak: kendi repo'su (ya da en azından kendi deploy birimi), kendi veritabanı, kendi container'ı, monolith'le mesaj kuyruğu üzerinden asenkron haberleşen bağımsız bir servis.
+1. Proje önce WMS'teki gibi bir **modüler monolith** olarak kuruldu (Clean Architecture, modül başına şema, CQRS — WMS'teki kanıtlanmış desen tekrar kullanıldı).
+2. Sonra **Payment modülü** (bkz. madde 3), gerçek, ayrı bir mikroservise çıkarılacak: ayrı deploy birimi, kendi veritabanı, monolith'le mesaj kuyruğu üzerinden asenkron haberleşen bağımsız bir servis (bkz. TASKS.md Faz 4).
 
 Bu yaklaşım **Martin Fowler'ın Strangler Fig pattern'i** ve Sam Newman'ın "Monolith to Microservices" kitabının temel yaklaşımıdır — gerçek şirketlerin mikroservise geçiş şekli budur, "trend diye mikroservis yapmak" değildir. Bu, mülakatta "neden mikroservis" sorusuna savunulabilir bir cevap verir.
 
-**Neden bu, hazmedilebilir?** Sıfırdan 4-5 servis + API gateway + service discovery + distributed tracing + saga orchestration hepsi birden öğrenilseydi bu seviye için çok fazla olurdu. Tek servis çıkarımıyla öğrenilecek yeni kavram seti küçük ve net: mesaj kuyruğu temelleri, servisler arası asenkron iletişim, eventual consistency, servis-özel veritabanı, bağımsız deploy. WMS'ten bilinen her şeyi (CQRS, outbox, domain event, Clean Architecture) tekrar kullanmak, yeni öğrenilecek şeyleri sadece "mikroservise özgü" olanlarla sınırlıyor.
+**Neden bu, hazmedilebilir?** Sıfırdan 4-5 servis + API gateway + service discovery + distributed tracing + saga orchestration hepsi birden öğrenilseydi bu seviye için çok fazla olurdu. Tek servis çıkarımıyla öğrenilecek yeni kavram seti küçük ve net: mesaj kuyruğu temelleri, servisler arası asenkron iletişim, eventual consistency, servis-özel veritabanı, bağımsız deploy.
 
-### 3. Ayrılacak Servis: Ödeme (Payment) — öneri, kesinleşmedi
+### 3. Ayrılacak Servis: Ödeme (Payment) — kesinleşti
 
-Konuşmada örnek olarak **Ödeme (Payment)** modülü öne çıkarıldı, gerekçesi: gerçek sistemlerde ödeme genelde PCI-DSS izolasyonu ve farklı deploy/ölçeklenme ihtiyaçları yüzünden ayrı tutulur — bu, "neden bu servisi ayırdın" sorusuna gerçek bir cevap verir. Trivial bir servis (ör. "email/bildirim gönder") ayırmak yapay/zorlama dururdu, bilinçli olarak kaçınıldı.
+**Ödeme (Payment)** modülü ayrılacak servis olarak kesinleşti (TASKS.md Faz 4). Gerekçe: gerçek sistemlerde ödeme genelde PCI-DSS izolasyonu ve farklı deploy/ölçeklenme ihtiyaçları yüzünden ayrı tutulur — bu, "neden bu servisi ayırdın" sorusuna gerçek bir cevap verir. Trivial bir servis (ör. "email/bildirim gönder") ayırmak yapay/zorlama dururdu, bilinçli olarak kaçınıldı.
 
-**Bu henüz kesin karar değil** — sonraki konuşmada domain modelleme netleşince teyit edilmeli veya değiştirilmeli.
+Payment, Faz 2'de **önce monolith'in içinde** normal bir modül olarak inşa edilecek (diğer modüllerden farksız), Faz 4'te strangler fig ile koparılacak.
 
-### 4. Domain Event vs. Entegrasyon Eventi — net ayrım (teyit edildi)
+### 4. Domain Event vs. Entegrasyon Eventi — net ayrım
 
-- **Domain event** (monolith'in kendi modülleri arası, aynı process içinde — WMS'teki gibi Catalog/Order/Inventory vb.): **MediatR** ile in-process dispatch edilir, WMS'teki gibi outbox pattern ile güvenceye alınabilir (aynı process/transaction sınırı içinde kaldığı için).
-- **Entegrasyon eventi** (monolith → Payment mikroservisi, process/deployment sınırını geçen): **RabbitMQ** üzerinden — Kafka değil, daha basit ve öğrenme eğrisi düşük, bu proje kapsamı için yeterli. MediatR in-process bir mekanizma olduğu için servis sınırını aşamaz, bu yüzden mesaj kuyruğu gerekiyor.
-
-Sipariş (Order) modülü Payment'a bir entegrasyon eventi yayınlayacak (RabbitMQ), Payment servisi bunu tüketip işleyecek — WMS'teki outbox+domain event akışına benzer bir mantık ama artık aynı process içinde değil, ayrı bir servise gidiyor.
+- **Domain event** (monolith'in kendi modülleri arası, aynı process içinde — Catalog/Order/Inventory vb.): **MediatR** ile in-process dispatch edilir, outbox pattern ile güvenceye alınır (aynı process/transaction sınırı içinde kaldığı için). Identity modülünde bu akış zaten çalışıyor (`UserRegisteredDomainEvent` örneği).
+- **Entegrasyon eventi** (monolith → Payment mikroservisi, process/deployment sınırını geçen): **RabbitMQ** üzerinden — Kafka değil, daha basit ve öğrenme eğrisi düşük. MediatR in-process bir mekanizma olduğu için servis sınırını aşamaz, bu yüzden mesaj kuyruğu gerekiyor. RabbitMQ, Payment ayrılana kadar (Faz 4) projeye **hiç eklenmeyecek** — Faz 1-3'te sadece in-process MediatR var, docker-compose'da RabbitMQ servisi yok.
 
 ### 5. Öğrenme Stratejisi (kurs vs. yaparak öğrenme)
 
-Kullanıcı Fatih Çakıroğlu'nun ~40-50 saatlik Udemy mikroservis kursunu izleyip izlememe konusunda tereddütlü. Karar: **kursun tamamı baştan izlenmeyecek.**
+Kullanıcı Fatih Çakıroğlu'nun ~40-50 saatlik Udemy mikroservis kursunun **tamamını baştan izlemeyecek**:
 
-- Sadece kursun giriş bölümü (mikroservis nedir, ne zaman kullanılır, monolith vs mikroservis tradeoff'ları) + RabbitMQ/mesaj kuyruğu bölümü izlenecek — bu kadarı kavram haritasını çizmeye yeter.
-- Kursun geri kalanı (API gateway, service discovery, Kubernetes, çoklu servis orchestration vb.) bu proje kapsamında **hemen uygulanmayacağı için** şimdilik atlanacak — izlenip uygulanmayan bilgi kalıcı olmuyor.
-- Sonra doğrudan e-ticaret monolith'ini kurmaya başlanacak; Payment'ı ayırma aşamasına gelindiğinde kursun ilgili bölümüne referans olarak dönülecek.
-- Gerekçe: kullanıcı WMS'i (CQRS, outbox pattern, Clean Architecture) hiç kurs izlemeden, doğrudan inşa ederek + ihtiyaç oldukça araştırarak öğrendi. Bu, kendisi için kanıtlanmış bir öğrenme stili; mikroserviste de aynı stratejinin izlenmesi öneriliyor.
+- Sadece giriş bölümü (mikroservis nedir, ne zaman kullanılır, monolith vs mikroservis tradeoff'ları) + RabbitMQ/mesaj kuyruğu bölümü izlenecek.
+- Kursun geri kalanı (API gateway, service discovery, Kubernetes, çoklu servis orchestration) bu proje kapsamında **hemen uygulanmayacağı için** şimdilik atlanacak.
+- Payment'ı ayırma aşamasına (Faz 4) gelindiğinde kursun ilgili bölümüne referans olarak dönülecek.
+- Gerekçe: kullanıcı WMS'i hiç kurs izlemeden, doğrudan inşa ederek + ihtiyaç oldukça araştırarak öğrendi — kendisi için kanıtlanmış bir öğrenme stili.
 
-## Henüz Karar Verilmemiş — Sonraki Konuşmada Netleştirilecek
+### 6. Modül Listesi — kesinleşti (tek satıcı, taktik DDD)
 
-- Modüler monolith'in tam modül listesi (Katalog/Sepet/Sipariş/Stok/Ödeme örnek olarak geçti, kesinleşmedi)
-- Backend teknoloji yığını (WMS .NET ile yapıldı, bu projede de aynısı mı kullanılacak yoksa farklı bir şey mi denenecek — konuşulmadı)
-- **Frontend yapısı — iki taraf var, ilişkisi belirsiz:**
-  - **Public taraf**: müşteri karşısı e-ticaret sitesi (Trendyol benzeri — ürün listeleme, sepet, sipariş verme).
-  - **Admin panel**: WMS'teki gibi yönetim arayüzü.
-  - Bu ikisi **tek bir frontend projesi** içinde mi olacak yoksa **ayrı iki proje** mi olacak — kesinleşmedi, gerekirse ayrılabilir.
-  - UI kütüphanesi: WMS'te shadcn/ui kullanıldı, bu projede **birebir aynısı zorunlu değil**. Olası kombinasyonlar hepsi açık: (a) public ve admin'de aynı kütüphane (ör. ikisi de shadcn), (b) admin'de shadcn, public'te farklı bir kütüphane (public taraf genelde daha "marka kimliği" ağırlıklı tasarım istediği için farklı bir seçim mantıklı olabilir), (c) ikisinde de shadcn'den farklı bir şey. Hiçbiri seçilmedi, sonraki konuşmada karar verilecek.
-- Ödeme servisinin teknoloji seçimi (aynı dil/framework mi, yoksa mikroservisin "farklı teknoloji kullanabilme" avantajını göstermek için bilinçli olarak farklı bir stack mi — polyglot persistence/polyglot programming örneği olabilir, konuşulmadı)
-- Deploy stratejisi (Docker Compose yeterli mi, yoksa Kubernetes'e mi geçilecek — önceki konuşmada Kubernetes'in bu aşamada "gereksiz rabbit hole" olduğu belirtildi, ama kesin karar yok)
-- Veri modeli / domain detayları (ürün kataloğu, sepet, sipariş akışı, ödeme akışı — hiçbiri henüz tasarlanmadı)
-- Test stratejisi, CI/CD (WMS'te CI/CD önerildi ama başlanmadı — bu projede baştan mı kurulacak?)
+İki temel karar modül/tablo tasarımını netleştirdi:
+- **Tek satıcı** (marketplace değil) — Trendyol'un UI/UX'ini andırıyor ama backend'de tek taraflı sipariş/ödeme akışı var. Sipariş sub-order'lara bölünmüyor, split payment yok, Seller modülü yok. Gerekçe: MVP kapsamını makul tutmak, "marketplace complexity'si bilinçli olarak scope dışı bırakıldı" diye savunulabilir.
+- **Taktik DDD** — Aggregate root + domain event + repository pattern (WMS'teki desenin devamı). Value Object sadece gerçekten anlamlı yerlerde kullanılır, her yerde zorlanmaz. Event storming gibi stratejik DDD süreçlerine girilmedi (MVP portföy projesi için gereksiz).
+
+**9 modül** (her biri kendi Postgres şeması, `src/Modules/{Module}/` altında):
+
+| Modül | Sorumluluk | Durum |
+|---|---|---|
+| **Identity** | Kimlik doğrulama, kullanıcı, adres defteri | ✅ Auth tam, adres defteri Faz 2 |
+| **Catalog** | Ürün, kategori, marka, dinamik varyant özellikleri | Faz 2 |
+| **Inventory** | Stok seviyesi, rezervasyon | Faz 2 |
+| **Cart** | Sepet (guest + kullanıcı) | Faz 2 |
+| **Order** | Sipariş, sipariş kalemi (snapshot), durum geçmişi | Faz 2 |
+| **Payment** | Ödeme (önce monolith içi, sonra mikroservis) | Faz 2 → Faz 4'te çıkarılır |
+| **Promotion** | Kupon/indirim | Faz 3 |
+| **Review** | Ürün yorumu/puanlama (satın alma doğrulamalı) | Faz 3 |
+| **Shipping** | Kargo takibi | Faz 3 |
+
+Modül bazında tablo isimleri ve gerekçeleri için TASKS.md'deki ilgili faz maddelerine bakılabilir (her modülün tabloları orada özetlendi). Kolon seviyesi detay henüz sadece Identity için koda döküldü; diğer modüller için görev başladığında (Planla adımında) netleştirilecek.
+
+**Not — Order snapshot mantığı (önemli DDD noktası):** `Orders.ShippingAddress` ve `OrderItems`'daki ürün adı/fiyat, `Identity.Addresses`/`Catalog.Products`'a FK ile bağlanmaz — sipariş anındaki değerin **kopyası** olarak saklanır. Sebep: kullanıcı adresini/ürün fiyatını sonradan değiştirse bile geçmiş sipariş etkilenmemeli.
+
+**Not — Inventory rezervasyon kararı:** Sepete ürün eklerken stok rezerve edilmez (TTL'li `StockReservations` tablosu ve background expiry job'ı yok — bilinçli MVP basitleştirmesi). Rezervasyon sadece Order oluşturulunca yapılır, bu yüzden 2 tablo (`StockItems` + `StockMovements`) yeterli.
+
+### 7. Backend Teknoloji Yığını — kesinleşti
+
+WMS ile aynı: **.NET 10**, **PostgreSQL**, **Clean Architecture**, **CQRS + MediatR** (in-process), **EF Core** (yazma tarafı) + **Dapper** (okuma tarafı), **outbox pattern** (domain event güvencesi), **Docker Compose**.
+
+### 8. Kimlik Doğrulama — JWT
+
+Access token + refresh token (stateless). Gerekçe: API'nin public site, admin panel ve ileride ayrılacak Payment servisi gibi birden fazla client/servis tarafından tüketilmesi bekleniyor — stateless JWT bu senaryoya cookie-session'dan daha uygun.
+
+## Teknik Konvansiyonlar (kod yazarken uyulacak kurallar)
+
+WMS'in backend yapısı (`C:\Users\turko\OneDrive\Desktop\WarehouseManagementSystem\backend`) referans alınarak kuruldu; aşağıdaki konvansiyonlar zaten kodda uygulanmış durumda, yeni modüller de aynı şekilde yazılmalı.
+
+**Solution yapısı:**
+```
+backend/
+├── ECommercePlatform.slnx
+├── Directory.Build.props        (TargetFramework net10.0, Nullable enable, ImplicitUsings enable)
+├── Directory.Packages.props     (Central Package Management — NuGet versiyonları burada, csproj'larda version yok)
+├── src/
+│   ├── ECommercePlatform.SharedKernel/                        (BaseEntity, IDomainEvent, Result/Result<T>, Error, Guard)
+│   ├── BuildingBlocks/
+│   │   ├── ECommercePlatform.BuildingBlocks.Application/       (ICommand, IQuery, handler interface'leri, DomainEventNotification, LoggingBehavior, ValidationBehavior)
+│   │   └── ECommercePlatform.BuildingBlocks.Infrastructure/    (Outbox: OutboxMessage/OutboxWritingInterceptor/OutboxProcessor<TDbContext>, ISqlConnectionFactory/NpgsqlConnectionFactory, JwtOptions)
+│   ├── Modules/{ModuleName}/
+│   │   ├── ECommercePlatform.Modules.{Module}.Domain/           (sadece SharedKernel'e bağımlı)
+│   │   ├── ECommercePlatform.Modules.{Module}.Application/      (Domain + BuildingBlocks.Application'a bağımlı; Abstractions/, Dtos/, {Feature}/ klasörleri)
+│   │   └── ECommercePlatform.Modules.{Module}.Infrastructure/   (Application + BuildingBlocks.Infrastructure'a bağımlı; Persistence/, Repositories/, {Module}Module.cs)
+│   └── ECommercePlatform.Api/                                   (composition root: Program.cs, Controllers/, appsettings.json)
+└── tests/
+    └── ECommercePlatform.Modules.{Module}.UnitTests/
+```
+
+**İsimlendirme:** modül adları tekil (Identity, Catalog...), her katman ayrı csproj, namespace = csproj adı. Command/query/handler/validator her biri ayrı dosya (`CreateXCommand.cs`, `CreateXCommandHandler.cs`, `CreateXCommandValidator.cs`), feature-per-aggregate klasörleri (`Users/`, ileride `Products/` vb.). Primary constructor + `sealed` + file-scoped namespace her yerde. Handler'lar `Result`/`Result<T>` döner, business hatası için exception **fırlatılmaz**.
+
+**CQRS akışı:** Command → `ICommand`/`ICommand<T>` (yazma, EF Core repository) → `ICommandHandler`. Query → `IQuery<T>` (okuma, Dapper raw SQL) → `IQueryHandler`. Her modülün `{Module}Module.cs`'i kendi `AddMediatR`/`AddValidatorsFromAssembly` çağrısını yapar (global tek kayıt değil, modül-scoped).
+
+**Outbox akışı:** Entity domain event raise eder (`BaseEntity.AddDomainEvent`) → `OutboxWritingInterceptor` (EF Core `SaveChangesInterceptor`) aynı transaction'da `outbox_messages` tablosuna yazar → `OutboxProcessor<TDbContext>` (generic `BackgroundService`, her modül için ayrı instance, 5 saniyede bir poll eder) MediatR `IPublisher` ile `DomainEventNotification<T>` yayınlar.
+
+**Veritabanı:** Tek PostgreSQL instance, **modül başına şema** (`identity`, `catalog`, vb. — `{Module}DbContext.Schema` sabiti). Kolon/tablo adları **snake_case** (`EFCore.NamingConventions` paketi, `.UseSnakeCaseNamingConvention()` — manuel `HasColumnName` yazılmıyor). Migration'lar `dotnet ef migrations add ... --project src/Modules/{Module}/...Infrastructure --startup-project src/ECommercePlatform.Api` ile üretiliyor; her modülün kendi `{Module}DbContextFactory` (design-time factory) sınıfı var.
+
+**Şifre hash'leme:** `Microsoft.Extensions.Identity.Core` paketindeki `PasswordHasher<TUser>` (ekstra BCrypt gibi bir paket yok).
+
+**JWT:** `System.IdentityModel.Tokens.Jwt` ile üretiliyor, `JwtOptions` (Issuer/Audience/SigningKey/expiration'lar) `BuildingBlocks.Infrastructure.Security`'de tanımlı, hem Identity'nin token üreticisi hem Api'nin `AddJwtBearer` doğrulaması aynı config section'ı (`Jwt`) okuyor.
+
+**Docker Compose gotcha — ÖNEMLİ:** Postgres container'ının host portu **5433**, standart 5432 değil. Sebep: bu makinede WMS projesinin kendi Postgres container'ı zaten 5432'yi kullanıyor, çakışmayı önlemek için ECommercePlatform 5433'e taşındı. `appsettings.json`, `.env.example` ve `IdentityDbContextFactory`'deki fallback connection string hepsi buna göre ayarlı. Yeni bir makinede (WMS çalışmıyorsa) 5432'ye geri alınabilir ama şu an **5433 doğru port**.
+
+**MediatR lisansı — bilinçli kabul edildi:** MediatR v13+ ("Lucky Penny Software") ticari kullanım için ücretli lisans gerektiriyor; dev/test için ücretsiz (loglarda uyarı görünür, zararsız). Bu proje portföy amaçlı olduğu için **v14 ile devam etme kararı bilinçli olarak alındı** — free alternatif (ör. Mediator by Martin Othamar) veya v12.x'e pinleme seçenekleri değerlendirildi ama reddedildi. Production'a alınırsa bu karar yeniden gözden geçirilmeli.
 
 ## Referans
 
-Aynı mimari felsefeyi paylaşan başka bir modüler monolith örneği (WMS/Depo Yönetim Sistemi) mevcut — Clean Architecture, CQRS, outbox pattern, naming standardı gibi konularda oradaki kararlara referans olarak bakılabilir, ama bu yeni proje için otomatik olarak kopyalanmamalı; her karar bu projenin kendi ihtiyaçlarına göre yeniden değerlendirilmeli.
+WMS/Depo Yönetim Sistemi (`C:\Users\turko\OneDrive\Desktop\WarehouseManagementSystem`, GitHub: `aygunbayirdev/warehouse-management-system`) aynı mimari felsefeyi paylaşan bir modüler monolith örneği — Clean Architecture, CQRS, outbox pattern, naming standardı bu projenin başlangıç noktasıydı ve büyük ölçüde birebir mirror edildi (bkz. "Teknik Konvansiyonlar"). Yeni bir modül eklerken emin olunmayan bir konvansiyon varsa WMS'teki karşılığına bakılabilir.
+
+## Henüz Karar Verilmemiş — İlgili Faza Gelince Netleştirilecek
+
+- **Frontend yapısı** (TASKS.md Faz 5): public site + admin panel tek proje mi ayrı mı; UI kütüphanesi (WMS'te shadcn/ui kullanıldı, birebir aynısı zorunlu değil — public tarafta marka kimliği için farklı bir kütüphane mantıklı olabilir, admin'de shadcn kalabilir).
+- **Payment servisinin teknoloji seçimi** (TASKS.md Faz 4): aynı .NET stack mi, yoksa mikroservisin "farklı teknoloji kullanabilme" avantajını göstermek için bilinçli olarak farklı bir stack mi (polyglot persistence/programming örneği olabilir).
+- **Deploy stratejisi** (TASKS.md Faz 6): Docker Compose yeterli mi, Kubernetes'e mi geçilecek — Kubernetes şimdilik "gereksiz rabbit hole" olarak değerlendirildi, kesin karar yok.
+- **CI/CD detayları** (TASKS.md Faz 6): hangi pipeline aracı, hangi aşamalar.
