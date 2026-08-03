@@ -77,4 +77,10 @@ public sealed class Cart : BaseEntity
 
         return Result.Success();
     }
+
+    public void Clear()
+    {
+        _items.Clear();
+        UpdatedAtUtc = DateTime.UtcNow;
+    }
 }

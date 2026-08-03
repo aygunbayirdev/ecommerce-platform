@@ -77,4 +77,16 @@ public sealed class CartTests
         Assert.True(result.IsFailure);
         Assert.Equal(ErrorType.NotFound, result.Error.Type);
     }
+
+    [Fact]
+    public void Clear_ShouldRemoveAllItems()
+    {
+        var cart = Domain.Cart.Create(userId: null);
+        cart.AddItem(Guid.NewGuid(), 1);
+        cart.AddItem(Guid.NewGuid(), 2);
+
+        cart.Clear();
+
+        Assert.Empty(cart.Items);
+    }
 }

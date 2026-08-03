@@ -1,7 +1,9 @@
 using ECommercePlatform.BuildingBlocks.Infrastructure;
 using ECommercePlatform.BuildingBlocks.Infrastructure.Outbox;
 using ECommercePlatform.Modules.Order.Application;
+using ECommercePlatform.Modules.Order.Application.Abstractions;
 using ECommercePlatform.Modules.Order.Infrastructure.Persistence;
+using ECommercePlatform.Modules.Order.Infrastructure.Repositories;
 using FluentValidation;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
@@ -24,6 +26,9 @@ public static class OrderModule
                     npgsqlOptions.MigrationsHistoryTable("__ef_migrations_history", OrderDbContext.Schema))
                 .UseSnakeCaseNamingConvention()
                 .AddInterceptors(sp.GetRequiredService<OutboxWritingInterceptor>()));
+
+        services.AddScoped<IOrderWriteRepository, OrderWriteRepository>();
+        services.AddScoped<IOrderReadRepository, OrderReadRepository>();
 
         services.AddMediatR(cfg => cfg.RegisterServicesFromAssembly(typeof(OrderApplicationAssemblyMarker).Assembly));
         services.AddValidatorsFromAssembly(typeof(OrderApplicationAssemblyMarker).Assembly);

@@ -8,7 +8,7 @@ Bu dosya projenin tüm mimari kararlarını, gerekçelerini ve kod yazarken uyul
 
 ## Şu An Neredeyiz
 
-Faz 1 tamamlandı. Faz 2'de şu ana kadar: Identity adres defteri, Catalog (referans veriler + Product/Variant/Image), Inventory (+ projenin ilk modüller arası domain event akışı: Catalog→Inventory) ve **Cart modülü** (+ projenin ilk cross-module READ composition'ı: Cart→Catalog senkron `ISender` query çağrısı) tamamlandı — hepsi migration'ları Postgres'e uygulanmış, unit testleri geçiyor durumda. Sıradaki iş **Order modülü** (Faz 2'nin bir sonraki maddesi). Detay ve tam sıralama için [TASKS.md](./TASKS.md).
+Faz 1 tamamlandı. Faz 2'de şu ana kadar: Identity adres defteri, Catalog (referans veriler + Product/Variant/Image), Inventory (+ projenin ilk modüller arası domain event akışı: Catalog→Inventory), Cart (+ projenin ilk cross-module READ composition'ı: Cart→Catalog senkron `ISender` query çağrısı) ve **Order modülü** (+ projenin ilk çok-modüllü checkout orkestrasyonu: Order→Cart/Identity/Inventory, dağıtık transaction yerine sıralamayla çözülen atomiklik — bkz. TASKS.md) tamamlandı — hepsi migration'ları Postgres'e uygulanmış, unit testleri geçiyor durumda. Sıradaki iş **Payment modülü** (Faz 2'nin son maddesi — bu tamamlanınca müşteri uçtan uca alışveriş yapabilir hale gelecek). Detay ve tam sıralama için [TASKS.md](./TASKS.md).
 
 ## Geliştirme Döngüsü
 

@@ -44,4 +44,45 @@ public sealed class StockItem : BaseEntity
 
         return Result.Success();
     }
+
+    public Result Reserve(int quantity)
+    {
+        if (quantity > AvailableQuantity)
+        {
+            return Result.Failure(Error.Conflict("StockItems.InsufficientStock", "Yetersiz stok."));
+        }
+
+        AvailableQuantity -= quantity;
+        ReservedQuantity += quantity;
+        _movements.Add(StockMovement.Create(Id, StockMovementType.Reserved, quantity, reason: null));
+
+        return Result.Success();
+    }
+
+    public Result Release(int quantity)
+    {
+        if (quantity > ReservedQuantity)
+        {
+            return Result.Failure(Error.Conflict("StockItems.InsufficientReservedStock", "Bırakılmak istenen miktar rezerve edilenden fazla."));
+        }
+
+        ReservedQuantity -= quantity;
+        AvailableQuantity += quantity;
+        _movements.Add(StockMovement.Create(Id, StockMovementType.Released, quantity, reason: null));
+
+        return Result.Success();
+    }
+
+    public Result Commit(int quantity)
+    {
+        if (quantity > ReservedQuantity)
+        {
+            return Result.Failure(Error.Conflict("StockItems.InsufficientReservedStock", "Düşülmek istenen miktar rezerve edilenden fazla."));
+        }
+
+        ReservedQuantity -= quantity;
+        _movements.Add(StockMovement.Create(Id, StockMovementType.Committed, quantity, reason: null));
+
+        return Result.Success();
+    }
 }

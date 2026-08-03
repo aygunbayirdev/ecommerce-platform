@@ -7,6 +7,12 @@ public sealed class OrderDbContext(DbContextOptions<OrderDbContext> options) : D
 {
     public const string Schema = "order";
 
+    public DbSet<Domain.Order> Orders => Set<Domain.Order>();
+
+    public DbSet<Domain.OrderItem> OrderItems => Set<Domain.OrderItem>();
+
+    public DbSet<Domain.OrderStatusHistory> OrderStatusHistories => Set<Domain.OrderStatusHistory>();
+
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {
         modelBuilder.HasDefaultSchema(Schema);
