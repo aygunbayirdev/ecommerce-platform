@@ -7,6 +7,10 @@ public sealed class PaymentDbContext(DbContextOptions<PaymentDbContext> options)
 {
     public const string Schema = "payment";
 
+    public DbSet<Domain.Payment> Payments => Set<Domain.Payment>();
+
+    public DbSet<Domain.PaymentTransaction> PaymentTransactions => Set<Domain.PaymentTransaction>();
+
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {
         modelBuilder.HasDefaultSchema(Schema);

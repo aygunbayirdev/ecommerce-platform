@@ -38,5 +38,6 @@
     <Project Path="tests/ECommercePlatform.Modules.Catalog.UnitTests/ECommercePlatform.Modules.Catalog.UnitTests.csproj" />
     <Project Path="tests/ECommercePlatform.Modules.Inventory.UnitTests/ECommercePlatform.Modules.Inventory.UnitTests.csproj" />
     <Project Path="tests/ECommercePlatform.Modules.Order.UnitTests/ECommercePlatform.Modules.Order.UnitTests.csproj" />
+    <Project Path="tests/ECommercePlatform.Modules.Payment.UnitTests/ECommercePlatform.Modules.Payment.UnitTests.csproj" />
   </Folder>
 </Solution>

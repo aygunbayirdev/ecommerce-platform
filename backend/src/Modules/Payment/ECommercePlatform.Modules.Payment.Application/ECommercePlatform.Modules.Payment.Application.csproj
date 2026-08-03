@@ -3,6 +3,10 @@
   <ItemGroup>
     <ProjectReference Include="..\ECommercePlatform.Modules.Payment.Domain\ECommercePlatform.Modules.Payment.Domain.csproj" />
     <ProjectReference Include="..\..\..\BuildingBlocks\ECommercePlatform.BuildingBlocks.Application\ECommercePlatform.BuildingBlocks.Application.csproj" />
+    <!-- Payment reads the order (ownership + status check) and, on a successful charge, marks it
+         paid — both via ISender, synchronously, because the customer needs to know immediately
+         whether their payment went through. See ProcessPaymentCommandHandler. -->
+    <ProjectReference Include="..\..\Order\ECommercePlatform.Modules.Order.Application\ECommercePlatform.Modules.Order.Application.csproj" />
   </ItemGroup>
 
   <PropertyGroup>

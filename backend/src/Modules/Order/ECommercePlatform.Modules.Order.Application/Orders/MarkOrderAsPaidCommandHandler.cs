@@ -1,15 +1,22 @@
 using ECommercePlatform.BuildingBlocks.Application.Messaging;
+using ECommercePlatform.Modules.Inventory.Application.Dtos;
+using ECommercePlatform.Modules.Inventory.Application.StockItems;
 using ECommercePlatform.Modules.Order.Application.Abstractions;
 using ECommercePlatform.SharedKernel;
+using MediatR;
 
 namespace ECommercePlatform.Modules.Order.Application.Orders;
 
 /// <summary>
-/// Stand-in for the Payment module, which doesn't exist yet — this admin-only endpoint lets the
-/// order status machine be exercised end to end. Once Payment lands, an Order domain event will
-/// drive this transition instead (mirrors the Catalog → Inventory event pattern).
+/// Called by ProcessPaymentCommand (Payment module) on a successful charge, and available as an
+/// admin-only endpoint for anything Payment doesn't cover yet.
+///
+/// Marking the order Paid is also the moment the stock reserved for it during checkout is
+/// permanently committed (<c>CommitStockCommand</c>) — it moves from "reserved, might still be
+/// released" to "gone for good," matching <c>StockItem.Commit</c>'s semantics in the Inventory
+/// module. See CancelMyOrderCommandHandler for the mirror-image case (releasing, not committing).
 /// </summary>
-public sealed class MarkOrderAsPaidCommandHandler(IOrderWriteRepository orderWriteRepository)
+public sealed class MarkOrderAsPaidCommandHandler(IOrderWriteRepository orderWriteRepository, ISender sender)
     : ICommandHandler<MarkOrderAsPaidCommand>
 {
     public async Task<Result> Handle(MarkOrderAsPaidCommand request, CancellationToken cancellationToken)
@@ -29,6 +36,9 @@ public sealed class MarkOrderAsPaidCommandHandler(IOrderWriteRepository orderWri
         }
 
         await orderWriteRepository.SaveChangesAsync(cancellationToken);
+
+        var items = order.Items.Select(i => new StockReservationItem(i.ProductVariantId, i.Quantity)).ToList();
+        await sender.Send(new CommitStockCommand(items), cancellationToken);
 
         return Result.Success();
     }

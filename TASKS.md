@@ -12,7 +12,7 @@ Görevler **MVP'ye ulaşana kadar yapılacak her şeyi** kapsayan fazlara ayrıl
 
 ---
 
-## Faz 2 — Çekirdek Alışveriş Döngüsü (MVP'nin omurgası)
+## Faz 2 — Çekirdek Alışveriş Döngüsü (MVP'nin omurgası) ✅ tamamlandı
 
 Amaç: bu faz bitince bir müşteri uçtan uca alışveriş yapabilmeli (ürüne bak → sepete ekle → sipariş ver → öde). Sıralama bağımlılığa göre: Identity (adres) → Catalog (ne satılıyor) → Inventory (stok var mı) → Cart (sepete ekle) → Order (sipariş) → Payment (öde).
 
@@ -25,7 +25,10 @@ Amaç: bu faz bitince bir müşteri uçtan uca alışveriş yapabilmeli (ürüne
   **Checkout orkestrasyonu — projenin ilk çok-modüllü yazma kompozisyonu:** `CreateOrderCommandHandler` (`Order.Application`, yeni proje referansları: `Cart.Application`, `Identity.Application`, `Inventory.Application`) `ISender` ile sırayla Cart'ın sepetini okur (zaten Catalog'la zenginleştirilmiş — ayrıca Catalog'a referans gerekmedi), Identity'den adresi okur, `Order`'ı oluşturup **kaydeder (commit point)**, sonra Inventory'den stok rezervasyonu ister. Rezervasyon senkron `ISender` çağrısıyla yapılıyor (Cart→Catalog'daki okuma kompozisyonu deseninin yazma tarafı — checkout'un başarılı/başarısız olduğu müşteriye hemen dönmeli). **Cross-module atomiklik, dağıtık transaction kurmadan, sıralamayla çözüldü:** rezervasyon başarısız olursa (yetersiz stok) zaten kaydedilmiş olan sipariş `Cancelled`'a çevrilir (nedeniyle) — böylece başarısızlık her zaman denetlenebilir bir iz bırakır (iptal edilmiş sipariş kaydı), asla "hayalet rezervasyon" gibi görünmez bir kaynak sızıntısına yol açmaz. Bu, Payment mikroservise ayrılınca gerçek saga/compensating-transaction ihtiyacının neden doğduğunu gösteren bir referans noktası. Inventory'ye bu iş için toplu (bulk, hepsi-ya-da-hiçbiri) `ReserveStockCommand`/`ReleaseStockCommand`/`CommitStockCommand` eklendi (`StockItem.Reserve`/`Release`/`Commit`, `StockMovementType`'a `Reserved`/`Released`/`Committed` eklendi).
   `mark-paid`/`mark-preparing`/`mark-shipped`/`mark-delivered` admin-only geçici uçlar olarak eklendi (Payment/Shipping henüz yokken durum makinesini uçtan uca test edilebilir kılmak için — ileride bu geçişleri Order'ın raise edeceği domain event'ler sürecek, tıpkı Catalog→Inventory gibi; `OrderReadyForPaymentDomainEvent` gibi bir event bu turda **bilinçli olarak eklenmedi**, Product/Variant görevindeki "tüketicisiz event ekleme" kararının aynısı — Payment görevine gelindiğinde event+tüketici birlikte eklenecek). Sipariş iptali sadece sipariş sahibi tarafından yapılabilir (`CancelMyOrderCommand`, ownership UserId eşleşmesiyle kontrol edilir), Shipped/Delivered sonrası iptale izin verilmiyor.
   Yol boyunca bir bug bulunup düzeltildi: `OrderNumber` ilk üretilen halinde `Guid.CreateVersion7()`'nin **ilk** 8 hex karakteri kullanılıyordu — bunlar UUIDv7'nin zaman damgası kısmı olduğu için birbirine yakın zamanlı siparişler aynı `OrderNumber`'ı üretip unique index'te çakışıyordu (uçtan uca doğrulama sırasında gerçek bir `DbUpdateException` ile yakalandı). Rastgele bitlerin olduğu **son** 8 karaktere geçilerek düzeltildi, regresyon testi eklendi. 14/14 yeni test (Order) + 65/65 toplam test geçiyor. Uçtan uca doğrulandı: mutlu yol (sepet→sipariş→stok rezerve→sepet boşalıyor), yetersiz stok (409, sipariş Cancelled olarak kayıtlı), sahiplik kontrolü (başka kullanıcının siparişini görme/iptal etme 404), tam durum zinciri (Paid→Preparing→Shipped→Delivered, sıra dışı çağrı Conflict).
-- [ ] **Payment modülü (monolith içinde ilk versiyon)** — Tablolar: `Payments` (OrderId, Amount, Status, Method), `PaymentTransactions` (gateway deneme kayıtları, idempotency key). Bu aşamada hâlâ monolith'in içinde, diğer modüllerden farksız — mock/test ödeme akışı (gerçek gateway entegrasyonu yok). Domain event ile Order → Payment akışı hâlâ **in-process MediatR** üzerinden (RabbitMQ henüz yok, bkz. Faz 4).
+- [x] **Payment modülü (monolith içinde, mock ödeme akışı)** — `Payment` (aggregate root: OrderId, Amount, Status) + `PaymentTransaction` (child, audit log — her deneme, `IdempotencyKey` unique). **Stripe test-mode entegrasyonu önce denendi, sonra vazgeçildi** — Stripe kayıt ekranında Türkiye desteklenen ülkeler arasında yok, kullanıcı ülke bilgisini yanlış beyan etmek istemedi (bkz. CLAUDE.md madde 9). Karar: şimdilik mock/test ödeme akışıyla devam, gerçek gateway (iyzico) **Faz 7**'de opsiyonel olarak eklenecek.
+  `IPaymentGateway` (Identity'deki `IPasswordHasher`/`ITokenGenerator` ile aynı port/adapter deseni) tek soyutlama noktası — bugünkü implementasyon `MockPaymentGateway` (kart `"0000"` ile bitiyorsa red, aksi halde onay). `ProcessPaymentCommandHandler` (`Payment.Application`, yeni proje referansı: `Order.Application`) sipariş sahipliğini ve `PaymentPending` durumunu `GetOrderByIdQuery` ile doğruluyor, gateway'i çağırıyor, `Payment.Attempt` ile idempotency-key korumalı sonucu kaydediyor, başarılıysa var olan `MarkOrderAsPaidCommand`'ı çağırıyor (Order tarafında yeni kod gerekmedi). Bağımlılık **tek yönlü** (`Payment.Application` → `Order.Application`) — döngüsel referans riski, mock akışta Order'ın Payment'a bir "hazırlık" event'i göndermesine hiç gerek olmamasıyla ortadan kalktı.
+  **Denetim sırasında bulunup düzeltilen bir eksiklik:** Order görevinde eklenen stok rezervasyonu (`ReserveStockCommand`) hiçbir zaman çözülmüyordu — ödenen siparişlerde stok sonsuza kadar `Reserved` kalıyordu. `MarkOrderAsPaidCommandHandler` artık `CommitStockCommand` çağırıyor (kalıcı düşüş), `CancelMyOrderCommandHandler` sadece `PaymentPending`'den iptalde `ReleaseStockCommand` çağırıyor (rezervasyon serbest kalıyor) — `Paid`/`Preparing`'den iptal (iade senaryosu) bu MVP'de ele alınmıyor, bilinçli bir sınır.
+  10/10 yeni test (Payment) + Order'a 4 yeni handler testi (Commit/Release doğrulaması) + 79/79 toplam test geçiyor. Uçtan uca doğrulandı: başarılı ödeme → sipariş `Paid`, stok `Committed`; red edilen kart → 409, sipariş `PaymentPending`'de kalıyor; aynı idempotency key tekrar → Conflict; yeni key ile retry → başarılı; zaten `Paid` siparişe tekrar ödeme → Conflict; başka kullanıcının siparişine ödeme → 404; iptal edilen `PaymentPending` sipariş → stok `Available`'a geri dönüyor.
 
 **Faz 2 bitiş kriteri:** bir müşteri register olup, ürünlere bakıp, sepete ekleyip, adres seçip sipariş verip, (mock) ödeme yapabiliyor olmalı — uçtan uca API testiyle doğrulanmalı (Identity Faz 1'de yapıldığı gibi curl/Postman ile).
 
@@ -67,7 +70,18 @@ Henüz hiçbir karar verilmedi (bkz. CLAUDE.md "Henüz Karar Verilmemiş"). Bu f
 
 - [ ] **CI/CD** — build + test pipeline (GitHub Actions), WMS'te de önerilip başlanmamıştı, bu projede en azından PR başına build+test çalıştırılması hedefleniyor.
 - [ ] **Test kapsamını genişlet** — her modül için Identity'dekine benzer unit test kapsamı (handler testleri), en az Order ve Payment için entegrasyon testleri (Testcontainers ile gerçek Postgres).
-- [ ] **Deploy stratejisi netleştir** — Docker Compose'un yeterli olup olmadığına karar ver (Kubernetes şimdilik "gereksiz rabbit hole" olarak değerlendirildi, kesin karar yok).
+- [ ] **Deploy** — Hetzner'deki kendi sunucumuza deploy edilecek (kesinleşti). Docker Compose'un yeterli olup olmadığına karar ver (Kubernetes şimdilik "gereksiz rabbit hole" olarak değerlendirildi). Faz 6 bitip MVP hazır olunca yayına alınır — Faz 7 (iyzico) bundan sonra, opsiyonel olarak ele alınır.
+
+---
+
+## Faz 7 — iyzico Entegrasyonu (opsiyonel, kullanıcı kendi eliyle yapacak)
+
+Site Faz 6 sonunda mevcut mock ödeme akışıyla yayınlanacak. Bu faz **isteğe bağlı** ve **kullanıcı tarafından bizzat, öğrenme amaçlı** yapılacak — Claude burada sadece adım adım rehberlik edecek, kodu yazmayacak. Ne zaman başlanacağına dair bir tarih taahhüdü yok, kullanıcı müsait olduğunda gündeme gelecek.
+
+- [ ] **`IyzicoPaymentGateway : IPaymentGateway`** — `Payment.Infrastructure/Gateways/`'e yeni bir sınıf, iyzico'nun resmi .NET SDK'sını kullanarak. `Payment.Domain`, `Payment.Application`, `PaymentsController`, testler — **hiçbiri değişmiyor** (bkz. CLAUDE.md madde 9, port/adapter deseninin tam olarak bunun için var olduğu nokta).
+- [ ] **DI kaydı** — `PaymentModule.cs`'te tek satır: `MockPaymentGateway` yerine `IyzicoPaymentGateway`.
+- [ ] **iyzico sandbox API key'leri** — `.env`/config'e eklenir (gitignored), `appsettings.json`'a placeholder.
+- [ ] **Uçtan uca doğrulama** — iyzico sandbox'ında gerçek bir test kartıyla ödeme, mock akıştaki tüm senaryoların (başarılı/red/idempotency) sandbox'ta da çalıştığının doğrulanması.
 
 ---
 
@@ -75,3 +89,4 @@ Henüz hiçbir karar verilmedi (bkz. CLAUDE.md "Henüz Karar Verilmemiş"). Bu f
 
 - Bir fazın tamamlanması için tüm alt maddelerinin bitmesi şart değil — her madde kendi başına bağımsız bir "görev" (dev loop'un bir turu), tamamlandıkça işaretlenir.
 - Faz sırası kesin değil, gerekirse (ör. frontend'i erken görmek istenirse Faz 5 öne çekilebilir) yeniden değerlendirilebilir — ama bir fazın içindeki madde sırası bağımlılık gerektirir.
+- Faz 7, Faz 1-6'nın tamamlanmasına bağımlı değil önem sırası açısından ama pratikte site yayınlandıktan sonra ele alınacak (kullanıcının tercihi).

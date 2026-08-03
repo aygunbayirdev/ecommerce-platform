@@ -8,7 +8,7 @@ Bu dosya projenin tüm mimari kararlarını, gerekçelerini ve kod yazarken uyul
 
 ## Şu An Neredeyiz
 
-Faz 1 tamamlandı. Faz 2'de şu ana kadar: Identity adres defteri, Catalog (referans veriler + Product/Variant/Image), Inventory (+ projenin ilk modüller arası domain event akışı: Catalog→Inventory), Cart (+ projenin ilk cross-module READ composition'ı: Cart→Catalog senkron `ISender` query çağrısı) ve **Order modülü** (+ projenin ilk çok-modüllü checkout orkestrasyonu: Order→Cart/Identity/Inventory, dağıtık transaction yerine sıralamayla çözülen atomiklik — bkz. TASKS.md) tamamlandı — hepsi migration'ları Postgres'e uygulanmış, unit testleri geçiyor durumda. Sıradaki iş **Payment modülü** (Faz 2'nin son maddesi — bu tamamlanınca müşteri uçtan uca alışveriş yapabilir hale gelecek). Detay ve tam sıralama için [TASKS.md](./TASKS.md).
+**Faz 2 tamamlandı** — Identity adres defteri, Catalog (referans veriler + Product/Variant/Image), Inventory (+ projenin ilk modüller arası domain event akışı: Catalog→Inventory), Cart (+ projenin ilk cross-module READ composition'ı: Cart→Catalog senkron `ISender` query çağrısı), Order (+ projenin ilk çok-modüllü checkout orkestrasyonu: Order→Cart/Identity/Inventory, dağıtık transaction yerine sıralamayla çözülen atomiklik) ve **Payment modülü** (mock/test ödeme akışı — bkz. madde 9 aşağıda, gerçek gateway Stripe denendi ama Türkiye desteklenmediği için vazgeçildi, iyzico'ya Faz 7'de geçilecek) tamamlandı. Bir müşteri artık register olup, ürünlere bakıp, sepete ekleyip, adres seçip sipariş verip, (mock) ödeme yapabiliyor — Faz 2 bitiş kriteri karşılandı. Sıradaki iş **Faz 3** (Promotion/Review/Shipping, sıra önemsiz). Detay ve tam sıralama için [TASKS.md](./TASKS.md).
 
 ## Geliştirme Döngüsü
 
@@ -80,7 +80,7 @@ Kullanıcı Fatih Çakıroğlu'nun ~40-50 saatlik Udemy mikroservis kursunun **t
 | **Inventory** | Stok seviyesi, rezervasyon | Faz 2 |
 | **Cart** | Sepet (guest + kullanıcı) | Faz 2 |
 | **Order** | Sipariş, sipariş kalemi (snapshot), durum geçmişi | Faz 2 |
-| **Payment** | Ödeme (önce monolith içi, sonra mikroservis) | Faz 2 → Faz 4'te çıkarılır |
+| **Payment** | Ödeme (önce monolith içi, sonra mikroservis) | Faz 2 tamamlandı (mock gateway) → Faz 4'te çıkarılır, Faz 7'de iyzico |
 | **Promotion** | Kupon/indirim | Faz 3 |
 | **Review** | Ürün yorumu/puanlama (satın alma doğrulamalı) | Faz 3 |
 | **Shipping** | Kargo takibi | Faz 3 |
@@ -98,6 +98,20 @@ WMS ile aynı: **.NET 10**, **PostgreSQL**, **Clean Architecture**, **CQRS + Med
 ### 8. Kimlik Doğrulama — JWT
 
 Access token + refresh token (stateless). Gerekçe: API'nin public site, admin panel ve ileride ayrılacak Payment servisi gibi birden fazla client/servis tarafından tüketilmesi bekleniyor — stateless JWT bu senaryoya cookie-session'dan daha uygun.
+
+### 9. Payment Modülü — Mock Gateway Deseni, Stripe Denemesi ve iyzico Planı
+
+**Neden Stripe değil:** Payment modülü için önce Stripe test-mode entegrasyonu denendi (kullanıcının isteğiyle). Ancak Stripe kayıt ekranında **Türkiye desteklenen ülkeler arasında yok** — kullanıcı gerçek bir finansal serviste ülke bilgisini yanlış beyan etmek istemediği için (doğru ve bilinçli bir karar) bu yoldan vazgeçildi. Bu, "neden X değil de Y" sorusuna gerçek, doğrulanabilir bir cevap.
+
+**Şu anki durum (Faz 2) — mock ödeme akışı:** `Payment.Application`'daki `IPaymentGateway` arayüzü (Identity'deki `IPasswordHasher`/`ITokenGenerator` ile aynı **port/adapter** deseni) her şeyin bağlandığı soyutlama; `Payment.Domain`, `ProcessPaymentCommandHandler`, controller ve testlerin **hiçbiri** gerçek bir gateway olup olmadığını bilmiyor/umursamıyor. Bugünkü implementasyon `MockPaymentGateway` (`Payment.Infrastructure/Gateways/`): kart numarası `"0000"` ile bitiyorsa reddediyor, aksi halde onaylıyor — gerçek test-mode gateway'lerin (Stripe'ın `4242...`/`...0002` gibi) "belirli numaralar belirli sonuç tetikler" konvansiyonunun bilinçli taklidi.
+
+**İdempotency key:** Her ödeme denemesi çağıran tarafın ürettiği bir `idempotencyKey` taşır (`ProcessPaymentCommand`). `Payment.Attempt` aynı key ile ikinci bir çağrıyı Conflict ile reddeder — gerçek gateway'lerin "network timeout sonrası aynı key ile retry = aynı sonuç, çift çekim yok" garantisinin domain seviyesinde taklidi. Başarısız bir deneme `Payment`'ı `Pending`'de bırakır (yeni bir key ile tekrar denenebilir), sadece başarılı bir deneme `Succeeded`'a geçirir (terminal).
+
+**Payment ↔ Order bağımlılık yönü — döngüsel referans riski nasıl önlendi:** `Payment.Application` → `Order.Application` (tek yönlü). Ödeme başarılı olunca zaten var olan `MarkOrderAsPaidCommand`'ı çağırıyor (Order tarafında yeni kod gerekmedi — bu komut daha önce admin-only stand-in olarak eklenmişti). Mock akışta Order'ın Payment'a bir "ödeme hazırlığı" event'i göndermesine gerek yok (gerçek bir gateway'de "PaymentIntent oluştur" gibi bir ön adım olurdu), bu yüzden ters yönde bir bağımlılığa (`Order.Application` → `Payment.Application`) hiç ihtiyaç yok — böyle bir çift yönlü bağımlılık zaten .NET'te derlenmezdi (circular project reference).
+
+**Ödeme başarılı/iptal olunca stok rezervasyonunun çözülmesi:** Order görevinde eklenen `ReserveStockCommand` sadece rezerve ediyordu; Payment görevi sırasında yapılan denetimde (kullanıcının önceki modüllerde istediği "eventler eksiksiz mi" denetiminin aynısı) **rezervasyonun hiç çözülmediği** bulundu — ödenen siparişlerde stok sonsuza kadar `Reserved` durumunda kalıyordu. Düzeltme: `MarkOrderAsPaidCommandHandler` artık `CommitStockCommand` çağırıyor (rezervasyon kalıcı düşüşe dönüşüyor), `CancelMyOrderCommandHandler` sadece **`PaymentPending` durumundan** iptal edilirken `ReleaseStockCommand` çağırıyor (rezervasyon serbest bırakılıyor) — `Created`'dan otomatik iptal (yetersiz stok) hiç rezervasyon yapmadığı için, `Paid`/`Preparing`'den iptal ise zaten committed stoğu ilgilendirdiği (bir iade/restock akışı gerektirir, bu MVP'de yok) için bu iki durumda release çağrılmıyor.
+
+**iyzico'ya geçiş — Faz 7 (opsiyonel, kullanıcı kendi eliyle yapacak):** Site Faz 6 sonunda mevcut mock akışla yayınlanacak. Kullanıcı müsait olduğunda, **öğrenme amaçlı kendi eliyle**, adım adım rehberlik alarak iyzico'yu entegre edecek (bkz. TASKS.md Faz 7). Değişecek olan **tek şey**: `Payment.Infrastructure/Gateways/`'e yeni bir `IyzicoPaymentGateway : IPaymentGateway` sınıfı + `PaymentModule.cs`'teki tek bir DI kaydı satırı (`MockPaymentGateway` yerine `IyzicoPaymentGateway`). `Payment.Domain`, `Payment.Application`, `PaymentsController`, testler — **hiçbiri değişmiyor**. Bu, port/adapter deseninin tam olarak ne işe yaradığının somut kanıtı.
 
 ## Teknik Konvansiyonlar (kod yazarken uyulacak kurallar)
 
@@ -147,5 +161,5 @@ WMS/Depo Yönetim Sistemi (`C:\Users\turko\OneDrive\Desktop\WarehouseManagementS
 
 - **Frontend yapısı** (TASKS.md Faz 5): public site + admin panel tek proje mi ayrı mı; UI kütüphanesi (WMS'te shadcn/ui kullanıldı, birebir aynısı zorunlu değil — public tarafta marka kimliği için farklı bir kütüphane mantıklı olabilir, admin'de shadcn kalabilir).
 - **Payment servisinin teknoloji seçimi** (TASKS.md Faz 4): aynı .NET stack mi, yoksa mikroservisin "farklı teknoloji kullanabilme" avantajını göstermek için bilinçli olarak farklı bir stack mi (polyglot persistence/programming örneği olabilir).
-- **Deploy stratejisi** (TASKS.md Faz 6): Docker Compose yeterli mi, Kubernetes'e mi geçilecek — Kubernetes şimdilik "gereksiz rabbit hole" olarak değerlendirildi, kesin karar yok.
+- **Deploy stratejisi** (TASKS.md Faz 6): **Hetzner'deki kendi sunucumuza deploy edilecek** — kesinleşti. Docker Compose ile mi, başka bir yöntemle mi olacağı henüz netleşmedi (Kubernetes şimdilik "gereksiz rabbit hole" olarak değerlendirildi). Faz 6 bitip MVP hazır olunca yayına alınacak.
 - **CI/CD detayları** (TASKS.md Faz 6): hangi pipeline aracı, hangi aşamalar.
