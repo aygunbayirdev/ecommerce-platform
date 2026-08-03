@@ -127,4 +127,32 @@ internal sealed class ProductReadRepository(ISqlConnectionFactory connectionFact
             TotalCount = totalCount,
         };
     }
+
+    public async Task<IReadOnlyList<ProductVariantSummaryDto>> GetVariantSummariesAsync(
+        IReadOnlyList<Guid> productVariantIds, CancellationToken cancellationToken)
+    {
+        const string sql = """
+            SELECT
+                pv.id AS "ProductVariantId",
+                p.name AS "ProductName",
+                pv.sku AS "Sku",
+                pv.price AS "Price",
+                (SELECT pi.url FROM catalog.product_images pi WHERE pi.product_id = p.id AND pi.is_primary = true LIMIT 1) AS "ImageUrl",
+                pv.is_active AS "IsActive"
+            FROM catalog.product_variants pv
+            JOIN catalog.products p ON p.id = pv.product_id
+            WHERE pv.id = ANY(@ProductVariantIds);
+            """;
+
+        using IDbConnection connection = connectionFactory.CreateConnection();
+
+        var command = new CommandDefinition(
+            sql,
+            new { ProductVariantIds = productVariantIds.ToArray() },
+            cancellationToken: cancellationToken);
+
+        var result = await connection.QueryAsync<ProductVariantSummaryDto>(command);
+
+        return result.ToList();
+    }
 }

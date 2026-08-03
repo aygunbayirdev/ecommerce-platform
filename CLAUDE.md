@@ -8,7 +8,7 @@ Bu dosya projenin tüm mimari kararlarını, gerekçelerini ve kod yazarken uyul
 
 ## Şu An Neredeyiz
 
-Faz 1 tamamlandı: .NET 10 modüler monolith iskeleti kuruldu (9 modül, hepsi derleniyor ve DI'a kayıtlı), **Identity modülü uçtan uca tam** (kayıt, JWT giriş, refresh token, kullanıcı sorgulama) — migration Postgres'e uygulandı, unit testler geçiyor, GitHub'a push edildi. Sıradaki iş **Faz 2**: Identity'nin adres defteri CQRS'i, ardından Catalog modülü. Detay ve tam sıralama için [TASKS.md](./TASKS.md).
+Faz 1 tamamlandı. Faz 2'de şu ana kadar: Identity adres defteri, Catalog (referans veriler + Product/Variant/Image), Inventory (+ projenin ilk modüller arası domain event akışı: Catalog→Inventory) ve **Cart modülü** (+ projenin ilk cross-module READ composition'ı: Cart→Catalog senkron `ISender` query çağrısı) tamamlandı — hepsi migration'ları Postgres'e uygulanmış, unit testleri geçiyor durumda. Sıradaki iş **Order modülü** (Faz 2'nin bir sonraki maddesi). Detay ve tam sıralama için [TASKS.md](./TASKS.md).
 
 ## Geliştirme Döngüsü
 

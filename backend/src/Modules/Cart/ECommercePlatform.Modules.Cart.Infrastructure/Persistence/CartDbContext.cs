@@ -7,6 +7,10 @@ public sealed class CartDbContext(DbContextOptions<CartDbContext> options) : DbC
 {
     public const string Schema = "cart";
 
+    public DbSet<Domain.Cart> Carts => Set<Domain.Cart>();
+
+    public DbSet<Domain.CartItem> CartItems => Set<Domain.CartItem>();
+
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {
         modelBuilder.HasDefaultSchema(Schema);

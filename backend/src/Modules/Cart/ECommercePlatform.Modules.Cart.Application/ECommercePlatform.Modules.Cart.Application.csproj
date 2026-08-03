@@ -3,6 +3,10 @@
   <ItemGroup>
     <ProjectReference Include="..\ECommercePlatform.Modules.Cart.Domain\ECommercePlatform.Modules.Cart.Domain.csproj" />
     <ProjectReference Include="..\..\..\BuildingBlocks\ECommercePlatform.BuildingBlocks.Application\ECommercePlatform.BuildingBlocks.Application.csproj" />
+    <!-- Cart reads product name/price/image live from Catalog (read composition, not an event) when
+         rendering a cart and when validating that a variant exists — see GetCartByIdQueryHandler
+         and AddItemToCartCommandHandler. -->
+    <ProjectReference Include="..\..\Catalog\ECommercePlatform.Modules.Catalog.Application\ECommercePlatform.Modules.Catalog.Application.csproj" />
   </ItemGroup>
 
   <PropertyGroup>

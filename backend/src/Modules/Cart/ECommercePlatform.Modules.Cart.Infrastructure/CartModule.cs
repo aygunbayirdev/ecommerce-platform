@@ -1,7 +1,9 @@
 using ECommercePlatform.BuildingBlocks.Infrastructure;
 using ECommercePlatform.BuildingBlocks.Infrastructure.Outbox;
 using ECommercePlatform.Modules.Cart.Application;
+using ECommercePlatform.Modules.Cart.Application.Abstractions;
 using ECommercePlatform.Modules.Cart.Infrastructure.Persistence;
+using ECommercePlatform.Modules.Cart.Infrastructure.Repositories;
 using FluentValidation;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
@@ -24,6 +26,9 @@ public static class CartModule
                     npgsqlOptions.MigrationsHistoryTable("__ef_migrations_history", CartDbContext.Schema))
                 .UseSnakeCaseNamingConvention()
                 .AddInterceptors(sp.GetRequiredService<OutboxWritingInterceptor>()));
+
+        services.AddScoped<ICartWriteRepository, CartWriteRepository>();
+        services.AddScoped<ICartReadRepository, CartReadRepository>();
 
         services.AddMediatR(cfg => cfg.RegisterServicesFromAssembly(typeof(CartApplicationAssemblyMarker).Assembly));
         services.AddValidatorsFromAssembly(typeof(CartApplicationAssemblyMarker).Assembly);
