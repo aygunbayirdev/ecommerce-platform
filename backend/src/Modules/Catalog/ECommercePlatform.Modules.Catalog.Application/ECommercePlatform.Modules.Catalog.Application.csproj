@@ -3,6 +3,7 @@
   <ItemGroup>
     <ProjectReference Include="..\ECommercePlatform.Modules.Catalog.Domain\ECommercePlatform.Modules.Catalog.Domain.csproj" />
     <ProjectReference Include="..\..\..\BuildingBlocks\ECommercePlatform.BuildingBlocks.Application\ECommercePlatform.BuildingBlocks.Application.csproj" />
+    <ProjectReference Include="..\..\Inventory\ECommercePlatform.Modules.Inventory.Application\ECommercePlatform.Modules.Inventory.Application.csproj" />
   </ItemGroup>
 
   <PropertyGroup>

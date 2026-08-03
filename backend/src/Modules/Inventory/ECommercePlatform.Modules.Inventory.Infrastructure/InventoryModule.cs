@@ -1,7 +1,9 @@
 using ECommercePlatform.BuildingBlocks.Infrastructure;
 using ECommercePlatform.BuildingBlocks.Infrastructure.Outbox;
 using ECommercePlatform.Modules.Inventory.Application;
+using ECommercePlatform.Modules.Inventory.Application.Abstractions;
 using ECommercePlatform.Modules.Inventory.Infrastructure.Persistence;
+using ECommercePlatform.Modules.Inventory.Infrastructure.Repositories;
 using FluentValidation;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
@@ -24,6 +26,9 @@ public static class InventoryModule
                     npgsqlOptions.MigrationsHistoryTable("__ef_migrations_history", InventoryDbContext.Schema))
                 .UseSnakeCaseNamingConvention()
                 .AddInterceptors(sp.GetRequiredService<OutboxWritingInterceptor>()));
+
+        services.AddScoped<IStockItemWriteRepository, StockItemWriteRepository>();
+        services.AddScoped<IStockItemReadRepository, StockItemReadRepository>();
 
         services.AddMediatR(cfg => cfg.RegisterServicesFromAssembly(typeof(InventoryApplicationAssemblyMarker).Assembly));
         services.AddValidatorsFromAssembly(typeof(InventoryApplicationAssemblyMarker).Assembly);

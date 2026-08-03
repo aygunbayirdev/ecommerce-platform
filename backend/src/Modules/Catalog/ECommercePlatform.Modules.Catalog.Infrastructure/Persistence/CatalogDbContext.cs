@@ -1,3 +1,4 @@
+using ECommercePlatform.BuildingBlocks.Infrastructure.Outbox;
 using ECommercePlatform.BuildingBlocks.Infrastructure.Persistence;
 using ECommercePlatform.Modules.Catalog.Domain;
 using Microsoft.EntityFrameworkCore;
@@ -24,10 +25,13 @@ public sealed class CatalogDbContext(DbContextOptions<CatalogDbContext> options)
 
     public DbSet<ProductImage> ProductImages => Set<ProductImage>();
 
+    public DbSet<OutboxMessage> OutboxMessages => Set<OutboxMessage>();
+
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {
         modelBuilder.HasDefaultSchema(Schema);
         modelBuilder.ApplyConfigurationsFromAssembly(typeof(CatalogDbContext).Assembly);
+        modelBuilder.ApplyConfiguration(new OutboxMessageConfiguration());
         modelBuilder.ApplyClientGeneratedKeys();
 
         base.OnModelCreating(modelBuilder);

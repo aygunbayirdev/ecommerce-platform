@@ -39,8 +39,7 @@ public static class CatalogModule
         services.AddMediatR(cfg => cfg.RegisterServicesFromAssembly(typeof(CatalogApplicationAssemblyMarker).Assembly));
         services.AddValidatorsFromAssembly(typeof(CatalogApplicationAssemblyMarker).Assembly);
 
-        // No AddOutboxProcessor<CatalogDbContext>() yet — this module has no entities/domain events
-        // to process. Register it once the module raises its first domain event (see TASKS.md).
+        services.AddOutboxProcessor<CatalogDbContext>();
 
         return services;
     }

@@ -24,7 +24,7 @@ public sealed class ProductVariant : BaseEntity
 
     internal static ProductVariant Create(Guid productId, string sku, decimal price)
     {
-        return new ProductVariant
+        var variant = new ProductVariant
         {
             ProductId = Guard.AgainstEmpty(productId, nameof(productId)),
             Sku = Guard.AgainstNullOrWhiteSpace(sku, nameof(sku)),
@@ -32,6 +32,10 @@ public sealed class ProductVariant : BaseEntity
             IsActive = true,
             CreatedAtUtc = DateTime.UtcNow,
         };
+
+        variant.AddDomainEvent(new ProductVariantCreatedDomainEvent(variant.Id, variant.ProductId));
+
+        return variant;
     }
 
     internal void SetAttributeValue(Guid productAttributeId, string value)

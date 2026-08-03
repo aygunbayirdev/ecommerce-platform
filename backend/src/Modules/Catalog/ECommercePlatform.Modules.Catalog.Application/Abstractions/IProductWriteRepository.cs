@@ -11,6 +11,9 @@ public interface IProductWriteRepository
 
     Task<bool> ExistsBySkuAsync(string sku, CancellationToken cancellationToken);
 
+    /// <summary>Used to guard against removing a CategoryAttribute while a variant of a product in that category still has a value set for it.</summary>
+    Task<bool> IsAttributeUsedByAnyVariantInCategoryAsync(Guid categoryId, Guid productAttributeId, CancellationToken cancellationToken);
+
     void Add(Product product);
 
     Task SaveChangesAsync(CancellationToken cancellationToken);

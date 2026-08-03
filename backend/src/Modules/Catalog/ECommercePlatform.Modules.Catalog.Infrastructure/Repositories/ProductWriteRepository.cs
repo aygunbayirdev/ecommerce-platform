@@ -19,6 +19,14 @@ internal sealed class ProductWriteRepository(CatalogDbContext dbContext) : IProd
     public Task<bool> ExistsBySkuAsync(string sku, CancellationToken cancellationToken)
         => dbContext.ProductVariants.AnyAsync(v => v.Sku == sku, cancellationToken);
 
+    public Task<bool> IsAttributeUsedByAnyVariantInCategoryAsync(
+        Guid categoryId, Guid productAttributeId, CancellationToken cancellationToken)
+        => dbContext.ProductVariantAttributeValues
+            .Where(av => av.ProductAttributeId == productAttributeId)
+            .Join(dbContext.ProductVariants, av => av.ProductVariantId, v => v.Id, (av, v) => v)
+            .Join(dbContext.Products, v => v.ProductId, p => p.Id, (v, p) => p)
+            .AnyAsync(p => p.CategoryId == categoryId, cancellationToken);
+
     public void Add(Product product) => dbContext.Products.Add(product);
 
     public Task SaveChangesAsync(CancellationToken cancellationToken) => dbContext.SaveChangesAsync(cancellationToken);
