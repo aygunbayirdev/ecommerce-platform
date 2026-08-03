@@ -16,6 +16,14 @@ public sealed class CatalogDbContext(DbContextOptions<CatalogDbContext> options)
 
     public DbSet<ProductAttribute> ProductAttributes => Set<ProductAttribute>();
 
+    public DbSet<Product> Products => Set<Product>();
+
+    public DbSet<ProductVariant> ProductVariants => Set<ProductVariant>();
+
+    public DbSet<ProductVariantAttributeValue> ProductVariantAttributeValues => Set<ProductVariantAttributeValue>();
+
+    public DbSet<ProductImage> ProductImages => Set<ProductImage>();
+
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {
         modelBuilder.HasDefaultSchema(Schema);

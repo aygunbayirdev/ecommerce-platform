@@ -33,6 +33,8 @@ public static class CatalogModule
         services.AddScoped<IBrandReadRepository, BrandReadRepository>();
         services.AddScoped<IProductAttributeWriteRepository, ProductAttributeWriteRepository>();
         services.AddScoped<IProductAttributeReadRepository, ProductAttributeReadRepository>();
+        services.AddScoped<IProductWriteRepository, ProductWriteRepository>();
+        services.AddScoped<IProductReadRepository, ProductReadRepository>();
 
         services.AddMediatR(cfg => cfg.RegisterServicesFromAssembly(typeof(CatalogApplicationAssemblyMarker).Assembly));
         services.AddValidatorsFromAssembly(typeof(CatalogApplicationAssemblyMarker).Assembly);
