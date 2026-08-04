@@ -71,6 +71,30 @@ builder.Services
 
 builder.Services.AddAuthorization();
 
+// Faz 5: the frontend (Next.js dev server, arbitrary localhost port) is a different origin from
+// this API. In Development any loopback origin is allowed — the frontend's port varies (fixed
+// 3000 normally, but the preview tooling used during development reassigns it when busy).
+// Non-Development environments use an explicit allowlist from config instead.
+const string frontendCorsPolicy = "Frontend";
+var corsAllowedOrigins = builder.Configuration.GetSection("Cors:AllowedOrigins").Get<string[]>() ?? [];
+
+builder.Services.AddCors(options =>
+{
+    options.AddPolicy(frontendCorsPolicy, policy =>
+    {
+        if (builder.Environment.IsDevelopment())
+        {
+            policy.SetIsOriginAllowed(origin => Uri.TryCreate(origin, UriKind.Absolute, out var uri) && uri.IsLoopback);
+        }
+        else
+        {
+            policy.WithOrigins(corsAllowedOrigins);
+        }
+
+        policy.AllowAnyHeader().AllowAnyMethod();
+    });
+});
+
 var app = builder.Build();
 
 // Configure the HTTP request pipeline.
@@ -80,6 +104,8 @@ if (app.Environment.IsDevelopment())
 }
 
 app.UseHttpsRedirection();
+
+app.UseCors(frontendCorsPolicy);
 
 app.UseAuthentication();
 app.UseAuthorization();
