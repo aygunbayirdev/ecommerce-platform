@@ -5,6 +5,7 @@ using ECommercePlatform.Modules.Identity.Application.Dtos;
 using ECommercePlatform.Modules.Inventory.Application.StockItems;
 using ECommercePlatform.Modules.Order.Application.Abstractions;
 using ECommercePlatform.Modules.Order.Application.Orders;
+using ECommercePlatform.Modules.Promotion.Application.Coupons;
 using ECommercePlatform.SharedKernel;
 using MediatR;
 using Moq;
@@ -127,6 +128,70 @@ public sealed class CreateOrderCommandHandlerTests
         Assert.True(result.IsFailure);
         Assert.Equal(ErrorType.Conflict, result.Error.Type);
         _orderWriteRepository.Verify(r => r.SaveChangesAsync(It.IsAny<CancellationToken>()), Times.Exactly(2));
+        _sender.Verify(s => s.Send(It.IsAny<ClearCartCommand>(), It.IsAny<CancellationToken>()), Times.Never);
+    }
+
+    [Fact]
+    public async Task Handle_ShouldRedeemCouponAndApplyDiscount_WhenCouponCodeProvided()
+    {
+        var userId = Guid.NewGuid();
+        var cartId = Guid.NewGuid();
+        var addressId = Guid.NewGuid();
+        var command = new CreateOrderCommand(userId, addressId, "SAVE10");
+
+        var cartView = new CartViewDto(
+            cartId, userId, [new CartItemViewDto(Guid.NewGuid(), 2, "Telefon", "SKU-1", 100m, null, 200m)], 200m);
+        SetUpCart(userId, cartId, cartView);
+
+        _sender
+            .Setup(s => s.Send(It.Is<GetAddressesByUserIdQuery>(q => q.UserId == userId), It.IsAny<CancellationToken>()))
+            .ReturnsAsync(Result.Success<IReadOnlyList<AddressDto>>([Address(addressId)]));
+        _sender
+            .Setup(s => s.Send(It.IsAny<ReserveStockCommand>(), It.IsAny<CancellationToken>()))
+            .ReturnsAsync(Result.Success());
+        _sender
+            .Setup(s => s.Send(It.Is<RedeemCouponCommand>(c => c.Code == "SAVE10" && c.Subtotal == 200m), It.IsAny<CancellationToken>()))
+            .ReturnsAsync(Result.Success(20m));
+        _sender
+            .Setup(s => s.Send(It.Is<ClearCartCommand>(c => c.CartId == cartId), It.IsAny<CancellationToken>()))
+            .ReturnsAsync(Result.Success());
+
+        var result = await _handler.Handle(command, CancellationToken.None);
+
+        Assert.True(result.IsSuccess);
+        _orderWriteRepository.Verify(r => r.SaveChangesAsync(It.IsAny<CancellationToken>()), Times.Exactly(2));
+        _sender.Verify(s => s.Send(It.IsAny<ReleaseStockCommand>(), It.IsAny<CancellationToken>()), Times.Never);
+        _sender.Verify(s => s.Send(It.Is<ClearCartCommand>(c => c.CartId == cartId), It.IsAny<CancellationToken>()), Times.Once);
+    }
+
+    [Fact]
+    public async Task Handle_ShouldReleaseStockAndCancelOrder_WhenCouponRedemptionFails()
+    {
+        var userId = Guid.NewGuid();
+        var cartId = Guid.NewGuid();
+        var addressId = Guid.NewGuid();
+        var command = new CreateOrderCommand(userId, addressId, "EXPIRED");
+
+        var cartView = new CartViewDto(
+            cartId, userId, [new CartItemViewDto(Guid.NewGuid(), 2, "Telefon", "SKU-1", 100m, null, 200m)], 200m);
+        SetUpCart(userId, cartId, cartView);
+
+        _sender
+            .Setup(s => s.Send(It.Is<GetAddressesByUserIdQuery>(q => q.UserId == userId), It.IsAny<CancellationToken>()))
+            .ReturnsAsync(Result.Success<IReadOnlyList<AddressDto>>([Address(addressId)]));
+        _sender
+            .Setup(s => s.Send(It.IsAny<ReserveStockCommand>(), It.IsAny<CancellationToken>()))
+            .ReturnsAsync(Result.Success());
+        _sender
+            .Setup(s => s.Send(It.IsAny<RedeemCouponCommand>(), It.IsAny<CancellationToken>()))
+            .ReturnsAsync(Result.Failure<decimal>(Error.Conflict("Coupons.OutOfValidityPeriod", "Kupon geçerlilik tarihi dışında.")));
+
+        var result = await _handler.Handle(command, CancellationToken.None);
+
+        Assert.True(result.IsFailure);
+        Assert.Equal(ErrorType.Conflict, result.Error.Type);
+        _orderWriteRepository.Verify(r => r.SaveChangesAsync(It.IsAny<CancellationToken>()), Times.Exactly(2));
+        _sender.Verify(s => s.Send(It.IsAny<ReleaseStockCommand>(), It.IsAny<CancellationToken>()), Times.Once);
         _sender.Verify(s => s.Send(It.IsAny<ClearCartCommand>(), It.IsAny<CancellationToken>()), Times.Never);
     }
 }

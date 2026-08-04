@@ -2,6 +2,7 @@ using ECommercePlatform.Modules.Inventory.Application.StockItems;
 using ECommercePlatform.Modules.Order.Application.Abstractions;
 using ECommercePlatform.Modules.Order.Application.Orders;
 using ECommercePlatform.Modules.Order.Domain;
+using ECommercePlatform.Modules.Promotion.Application.Coupons;
 using MediatR;
 using Moq;
 
@@ -48,6 +49,9 @@ public sealed class CancelMyOrderCommandHandlerTests
                 It.Is<ReleaseStockCommand>(c => c.Items.Single().ProductVariantId == variantId && c.Items.Single().Quantity == 3),
                 It.IsAny<CancellationToken>()),
             Times.Once);
+        _sender.Verify(
+            s => s.Send(It.Is<ReleaseCouponRedemptionCommand>(c => c.OrderId == order.Id), It.IsAny<CancellationToken>()),
+            Times.Once);
     }
 
     [Fact]
@@ -65,6 +69,7 @@ public sealed class CancelMyOrderCommandHandlerTests
 
         Assert.True(result.IsSuccess);
         _sender.Verify(s => s.Send(It.IsAny<ReleaseStockCommand>(), It.IsAny<CancellationToken>()), Times.Never);
+        _sender.Verify(s => s.Send(It.IsAny<ReleaseCouponRedemptionCommand>(), It.IsAny<CancellationToken>()), Times.Never);
     }
 
     [Fact]

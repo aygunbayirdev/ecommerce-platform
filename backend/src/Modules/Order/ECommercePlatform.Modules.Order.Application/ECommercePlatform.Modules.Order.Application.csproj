@@ -3,11 +3,13 @@
   <ItemGroup>
     <ProjectReference Include="..\ECommercePlatform.Modules.Order.Domain\ECommercePlatform.Modules.Order.Domain.csproj" />
     <ProjectReference Include="..\..\..\BuildingBlocks\ECommercePlatform.BuildingBlocks.Application\ECommercePlatform.BuildingBlocks.Application.csproj" />
-    <!-- Order orchestrates checkout across three modules via ISender: reads/clears the cart,
-         reads the shipping address, and reserves stock. See CreateOrderCommandHandler. -->
+    <!-- Order orchestrates checkout across four modules via ISender: reads/clears the cart,
+         reads the shipping address, reserves stock, and (optionally) redeems a coupon.
+         See CreateOrderCommandHandler. -->
     <ProjectReference Include="..\..\Cart\ECommercePlatform.Modules.Cart.Application\ECommercePlatform.Modules.Cart.Application.csproj" />
     <ProjectReference Include="..\..\Identity\ECommercePlatform.Modules.Identity.Application\ECommercePlatform.Modules.Identity.Application.csproj" />
     <ProjectReference Include="..\..\Inventory\ECommercePlatform.Modules.Inventory.Application\ECommercePlatform.Modules.Inventory.Application.csproj" />
+    <ProjectReference Include="..\..\Promotion\ECommercePlatform.Modules.Promotion.Application\ECommercePlatform.Modules.Promotion.Application.csproj" />
   </ItemGroup>
 
   <PropertyGroup>

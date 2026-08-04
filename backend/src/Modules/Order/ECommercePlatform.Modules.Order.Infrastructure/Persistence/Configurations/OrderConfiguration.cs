@@ -21,6 +21,8 @@ internal sealed class OrderConfiguration : IEntityTypeConfiguration<Domain.Order
         builder.Property(o => o.ShippingDistrict).HasMaxLength(100).IsRequired();
         builder.Property(o => o.ShippingFullAddressLine).HasMaxLength(500).IsRequired();
         builder.Property(o => o.ShippingPostalCode).HasMaxLength(10).IsRequired();
+        builder.Property(o => o.CouponCode).HasMaxLength(50);
+        builder.Property(o => o.DiscountAmount).IsRequired();
         builder.Property(o => o.CreatedAtUtc).IsRequired();
         builder.Property(o => o.UpdatedAtUtc).IsRequired();
 

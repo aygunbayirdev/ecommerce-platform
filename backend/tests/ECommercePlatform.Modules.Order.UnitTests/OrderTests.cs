@@ -47,6 +47,41 @@ public sealed class OrderTests
     }
 
     [Fact]
+    public void ApplyDiscount_ShouldReduceTotal()
+    {
+        var order = CreateOrder();
+
+        var result = order.ApplyDiscount("SAVE10", 22.5m);
+
+        Assert.True(result.IsSuccess);
+        Assert.Equal("SAVE10", order.CouponCode);
+        Assert.Equal(202.5m, order.Total);
+    }
+
+    [Fact]
+    public void ApplyDiscount_ShouldReturnConflict_WhenCalledTwice()
+    {
+        var order = CreateOrder();
+        order.ApplyDiscount("SAVE10", 22.5m);
+
+        var result = order.ApplyDiscount("SAVE20", 45m);
+
+        Assert.True(result.IsFailure);
+        Assert.Equal(ErrorType.Conflict, result.Error.Type);
+        Assert.Equal("SAVE10", order.CouponCode);
+    }
+
+    [Fact]
+    public void Total_ShouldNeverGoBelowZero_WhenDiscountExceedsSubtotal()
+    {
+        var order = CreateOrder();
+
+        order.ApplyDiscount("HUGE", 1000m);
+
+        Assert.Equal(0m, order.Total);
+    }
+
+    [Fact]
     public void MarkReadyForPayment_ShouldTransitionFromCreated()
     {
         var order = CreateOrder();

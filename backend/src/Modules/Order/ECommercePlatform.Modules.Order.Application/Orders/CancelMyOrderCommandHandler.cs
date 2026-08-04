@@ -3,6 +3,7 @@ using ECommercePlatform.Modules.Inventory.Application.Dtos;
 using ECommercePlatform.Modules.Inventory.Application.StockItems;
 using ECommercePlatform.Modules.Order.Application.Abstractions;
 using ECommercePlatform.Modules.Order.Domain;
+using ECommercePlatform.Modules.Promotion.Application.Coupons;
 using ECommercePlatform.SharedKernel;
 using MediatR;
 
@@ -16,6 +17,9 @@ namespace ECommercePlatform.Modules.Order.Application.Orders;
 /// order cancelled after Paid/Preparing already had its stock permanently committed — releasing it
 /// here would be wrong in both cases. Cancelling a Paid order (a refund scenario) isn't handled by
 /// this MVP; see TASKS.md.
+///
+/// <c>ReleaseCouponRedemptionCommand</c> is called unconditionally alongside the stock release —
+/// it's a no-op if the order never redeemed a coupon, so no extra branching is needed here.
 /// </summary>
 public sealed class CancelMyOrderCommandHandler(IOrderWriteRepository orderWriteRepository, ISender sender)
     : ICommandHandler<CancelMyOrderCommand>
@@ -44,6 +48,7 @@ public sealed class CancelMyOrderCommandHandler(IOrderWriteRepository orderWrite
         {
             var items = order.Items.Select(i => new StockReservationItem(i.ProductVariantId, i.Quantity)).ToList();
             await sender.Send(new ReleaseStockCommand(items), cancellationToken);
+            await sender.Send(new ReleaseCouponRedemptionCommand(order.Id), cancellationToken);
         }
 
         return Result.Success();

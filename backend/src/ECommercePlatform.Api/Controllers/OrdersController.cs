@@ -8,7 +8,7 @@ using Microsoft.AspNetCore.Mvc;
 
 namespace ECommercePlatform.Api.Controllers;
 
-public sealed record CreateOrderRequest(Guid AddressId);
+public sealed record CreateOrderRequest(Guid AddressId, string? CouponCode = null);
 
 public sealed record CancelOrderRequest(string Reason);
 
@@ -20,7 +20,7 @@ public sealed class OrdersController(ISender sender) : ControllerBase
     [HttpPost]
     public async Task<IActionResult> Create(CreateOrderRequest request, CancellationToken cancellationToken)
     {
-        var result = await sender.Send(new CreateOrderCommand(CurrentUserId, request.AddressId), cancellationToken);
+        var result = await sender.Send(new CreateOrderCommand(CurrentUserId, request.AddressId, request.CouponCode), cancellationToken);
 
         return result.IsSuccess
             ? CreatedAtAction(nameof(GetById), new { orderId = result.Value }, new { id = result.Value })

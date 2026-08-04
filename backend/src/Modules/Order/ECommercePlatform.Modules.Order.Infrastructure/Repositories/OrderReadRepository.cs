@@ -21,6 +21,8 @@ internal sealed class OrderReadRepository(ISqlConnectionFactory connectionFactor
         string ShippingDistrict,
         string ShippingFullAddressLine,
         string ShippingPostalCode,
+        string? CouponCode,
+        decimal DiscountAmount,
         DateTime CreatedAtUtc);
 
     private sealed record StatusHistoryRow(OrderStatus Status, string? Note, DateTime ChangedAtUtc);
@@ -35,6 +37,7 @@ internal sealed class OrderReadRepository(ISqlConnectionFactory connectionFactor
                 shipping_recipient_name AS "ShippingRecipientName", shipping_phone_number AS "ShippingPhoneNumber",
                 shipping_city AS "ShippingCity", shipping_district AS "ShippingDistrict",
                 shipping_full_address_line AS "ShippingFullAddressLine", shipping_postal_code AS "ShippingPostalCode",
+                coupon_code AS "CouponCode", discount_amount AS "DiscountAmount",
                 created_at_utc AS "CreatedAtUtc"
             FROM "order".orders
             WHERE id = @Id;
@@ -80,10 +83,12 @@ internal sealed class OrderReadRepository(ISqlConnectionFactory connectionFactor
             order.ShippingDistrict,
             order.ShippingFullAddressLine,
             order.ShippingPostalCode,
+            order.CouponCode,
+            order.DiscountAmount,
             order.CreatedAtUtc,
             items,
             statusHistory,
-            items.Sum(i => i.LineTotal));
+            Math.Max(0, items.Sum(i => i.LineTotal) - order.DiscountAmount));
     }
 
     public async Task<PagedResult<OrderSummaryDto>> GetByUserIdAsync(
@@ -96,7 +101,7 @@ internal sealed class OrderReadRepository(ISqlConnectionFactory connectionFactor
                 o.id AS "Id",
                 o.order_number AS "OrderNumber",
                 o.status AS "Status",
-                (SELECT COALESCE(SUM(oi.unit_price * oi.quantity), 0) FROM "order".order_items oi WHERE oi.order_id = o.id) AS "Total",
+                GREATEST(0, (SELECT COALESCE(SUM(oi.unit_price * oi.quantity), 0) FROM "order".order_items oi WHERE oi.order_id = o.id) - o.discount_amount) AS "Total",
                 o.created_at_utc AS "CreatedAtUtc"
             FROM "order".orders o
             WHERE o.user_id = @UserId

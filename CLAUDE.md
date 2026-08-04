@@ -8,7 +8,9 @@ Bu dosya projenin tüm mimari kararlarını, gerekçelerini ve kod yazarken uyul
 
 ## Şu An Neredeyiz
 
-**Faz 2 tamamlandı** — Identity adres defteri, Catalog (referans veriler + Product/Variant/Image), Inventory (+ projenin ilk modüller arası domain event akışı: Catalog→Inventory), Cart (+ projenin ilk cross-module READ composition'ı: Cart→Catalog senkron `ISender` query çağrısı), Order (+ projenin ilk çok-modüllü checkout orkestrasyonu: Order→Cart/Identity/Inventory, dağıtık transaction yerine sıralamayla çözülen atomiklik) ve **Payment modülü** (mock/test ödeme akışı — bkz. madde 9 aşağıda, gerçek gateway Stripe denendi ama Türkiye desteklenmediği için vazgeçildi, iyzico'ya Faz 7'de geçilecek) tamamlandı. Bir müşteri artık register olup, ürünlere bakıp, sepete ekleyip, adres seçip sipariş verip, (mock) ödeme yapabiliyor — Faz 2 bitiş kriteri karşılandı. Sıradaki iş **Faz 3** (Promotion/Review/Shipping, sıra önemsiz). Detay ve tam sıralama için [TASKS.md](./TASKS.md).
+**Faz 2 tamamlandı** — Identity adres defteri, Catalog (referans veriler + Product/Variant/Image), Inventory (+ projenin ilk modüller arası domain event akışı: Catalog→Inventory), Cart (+ projenin ilk cross-module READ composition'ı: Cart→Catalog senkron `ISender` query çağrısı), Order (+ projenin ilk çok-modüllü checkout orkestrasyonu: Order→Cart/Identity/Inventory, dağıtık transaction yerine sıralamayla çözülen atomiklik) ve **Payment modülü** (mock/test ödeme akışı — bkz. madde 9 aşağıda, gerçek gateway Stripe denendi ama Türkiye desteklenmediği için vazgeçildi, iyzico'ya Faz 7'de geçilecek) tamamlandı. Bir müşteri artık register olup, ürünlere bakıp, sepete ekleyip, adres seçip sipariş verip, (mock) ödeme yapabiliyor — Faz 2 bitiş kriteri karşılandı.
+
+**Faz 3'e başlandı** — **Promotion modülü** (kupon/indirim) tamamlandı: `Coupon`/`CouponRedemption`, checkout orkestrasyonuna (`CreateOrderCommandHandler`) stok rezervasyonundan sonraki üçüncü adım olarak eklendi (Inventory'nin Reserve/Release deseninin kupon kullanımına uygulanışı — bkz. TASKS.md Faz 3 detayı). Sıradaki iş Review ve Shipping (sıra önemsiz). Detay ve tam sıralama için [TASKS.md](./TASKS.md).
 
 ## Geliştirme Döngüsü
 
@@ -81,7 +83,7 @@ Kullanıcı Fatih Çakıroğlu'nun ~40-50 saatlik Udemy mikroservis kursunun **t
 | **Cart** | Sepet (guest + kullanıcı) | Faz 2 |
 | **Order** | Sipariş, sipariş kalemi (snapshot), durum geçmişi | Faz 2 |
 | **Payment** | Ödeme (önce monolith içi, sonra mikroservis) | Faz 2 tamamlandı (mock gateway) → Faz 4'te çıkarılır, Faz 7'de iyzico |
-| **Promotion** | Kupon/indirim | Faz 3 |
+| **Promotion** | Kupon/indirim | Faz 3 tamamlandı |
 | **Review** | Ürün yorumu/puanlama (satın alma doğrulamalı) | Faz 3 |
 | **Shipping** | Kargo takibi | Faz 3 |
 

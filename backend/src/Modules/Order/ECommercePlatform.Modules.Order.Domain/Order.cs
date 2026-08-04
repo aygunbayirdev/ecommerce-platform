@@ -29,6 +29,11 @@ public sealed class Order : BaseEntity
 
     public string ShippingPostalCode { get; private set; } = string.Empty;
 
+    /// <summary>Snapshot of the coupon code applied at checkout, if any — not an FK to Promotion.Coupon (that coupon could be deactivated later without affecting this order).</summary>
+    public string? CouponCode { get; private set; }
+
+    public decimal DiscountAmount { get; private set; }
+
     public DateTime CreatedAtUtc { get; private set; }
 
     public DateTime UpdatedAtUtc { get; private set; }
@@ -37,7 +42,7 @@ public sealed class Order : BaseEntity
 
     public IReadOnlyCollection<OrderStatusHistory> StatusHistory => _statusHistory.AsReadOnly();
 
-    public decimal Total => _items.Sum(i => i.LineTotal);
+    public decimal Total => Math.Max(0, _items.Sum(i => i.LineTotal) - DiscountAmount);
 
     public static Order Create(
         Guid userId,
@@ -78,6 +83,20 @@ public sealed class Order : BaseEntity
         order._statusHistory.Add(OrderStatusHistory.Create(order.Id, OrderStatus.Created, note: null));
 
         return order;
+    }
+
+    public Result ApplyDiscount(string couponCode, decimal discountAmount)
+    {
+        if (CouponCode is not null)
+        {
+            return Result.Failure(Error.Conflict("Orders.CouponAlreadyApplied", "Bu siparişe zaten bir kupon uygulanmış."));
+        }
+
+        CouponCode = couponCode;
+        DiscountAmount = discountAmount;
+        UpdatedAtUtc = DateTime.UtcNow;
+
+        return Result.Success();
     }
 
     public Result MarkReadyForPayment() => TransitionTo(OrderStatus.PaymentPending, from: OrderStatus.Created, note: null);

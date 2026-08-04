@@ -22,7 +22,7 @@ public sealed class ProcessPaymentCommandHandlerTests
 
     private static OrderDetailDto Order(Guid userId, string status, decimal total) => new(
         Guid.NewGuid(), "ORD-1", userId, status, "Ayşe Yılmaz", "5551234567",
-        "İstanbul", "Kadıköy", "Bir sokak No:1", "34000", DateTime.UtcNow, [], [], total);
+        "İstanbul", "Kadıköy", "Bir sokak No:1", "34000", null, 0m, DateTime.UtcNow, [], [], total);
 
     [Fact]
     public async Task Handle_ShouldReturnNotFound_WhenOrderDoesNotBelongToUser()

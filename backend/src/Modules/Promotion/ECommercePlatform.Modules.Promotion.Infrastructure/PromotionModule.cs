@@ -1,7 +1,9 @@
 using ECommercePlatform.BuildingBlocks.Infrastructure;
 using ECommercePlatform.BuildingBlocks.Infrastructure.Outbox;
 using ECommercePlatform.Modules.Promotion.Application;
+using ECommercePlatform.Modules.Promotion.Application.Abstractions;
 using ECommercePlatform.Modules.Promotion.Infrastructure.Persistence;
+using ECommercePlatform.Modules.Promotion.Infrastructure.Repositories;
 using FluentValidation;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
@@ -24,6 +26,9 @@ public static class PromotionModule
                     npgsqlOptions.MigrationsHistoryTable("__ef_migrations_history", PromotionDbContext.Schema))
                 .UseSnakeCaseNamingConvention()
                 .AddInterceptors(sp.GetRequiredService<OutboxWritingInterceptor>()));
+
+        services.AddScoped<ICouponWriteRepository, CouponWriteRepository>();
+        services.AddScoped<ICouponReadRepository, CouponReadRepository>();
 
         services.AddMediatR(cfg => cfg.RegisterServicesFromAssembly(typeof(PromotionApplicationAssemblyMarker).Assembly));
         services.AddValidatorsFromAssembly(typeof(PromotionApplicationAssemblyMarker).Assembly);

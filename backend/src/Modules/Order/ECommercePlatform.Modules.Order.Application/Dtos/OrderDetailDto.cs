@@ -11,6 +11,8 @@ public sealed record OrderDetailDto(
     string ShippingDistrict,
     string ShippingFullAddressLine,
     string ShippingPostalCode,
+    string? CouponCode,
+    decimal DiscountAmount,
     DateTime CreatedAtUtc,
     IReadOnlyList<OrderItemDto> Items,
     IReadOnlyList<OrderStatusHistoryDto> StatusHistory,
