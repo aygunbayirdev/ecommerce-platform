@@ -1,7 +1,9 @@
 using ECommercePlatform.BuildingBlocks.Infrastructure;
 using ECommercePlatform.BuildingBlocks.Infrastructure.Outbox;
 using ECommercePlatform.Modules.Shipping.Application;
+using ECommercePlatform.Modules.Shipping.Application.Abstractions;
 using ECommercePlatform.Modules.Shipping.Infrastructure.Persistence;
+using ECommercePlatform.Modules.Shipping.Infrastructure.Repositories;
 using FluentValidation;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
@@ -24,6 +26,9 @@ public static class ShippingModule
                     npgsqlOptions.MigrationsHistoryTable("__ef_migrations_history", ShippingDbContext.Schema))
                 .UseSnakeCaseNamingConvention()
                 .AddInterceptors(sp.GetRequiredService<OutboxWritingInterceptor>()));
+
+        services.AddScoped<IShipmentWriteRepository, ShipmentWriteRepository>();
+        services.AddScoped<IShipmentReadRepository, ShipmentReadRepository>();
 
         services.AddMediatR(cfg => cfg.RegisterServicesFromAssembly(typeof(ShippingApplicationAssemblyMarker).Assembly));
         services.AddValidatorsFromAssembly(typeof(ShippingApplicationAssemblyMarker).Assembly);

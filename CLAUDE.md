@@ -10,7 +10,7 @@ Bu dosya projenin tüm mimari kararlarını, gerekçelerini ve kod yazarken uyul
 
 **Faz 2 tamamlandı** — Identity adres defteri, Catalog (referans veriler + Product/Variant/Image), Inventory (+ projenin ilk modüller arası domain event akışı: Catalog→Inventory), Cart (+ projenin ilk cross-module READ composition'ı: Cart→Catalog senkron `ISender` query çağrısı), Order (+ projenin ilk çok-modüllü checkout orkestrasyonu: Order→Cart/Identity/Inventory, dağıtık transaction yerine sıralamayla çözülen atomiklik) ve **Payment modülü** (mock/test ödeme akışı — bkz. madde 9 aşağıda, gerçek gateway Stripe denendi ama Türkiye desteklenmediği için vazgeçildi, iyzico'ya Faz 7'de geçilecek) tamamlandı. Bir müşteri artık register olup, ürünlere bakıp, sepete ekleyip, adres seçip sipariş verip, (mock) ödeme yapabiliyor — Faz 2 bitiş kriteri karşılandı.
 
-**Faz 3'te devam ediliyor** — **Promotion modülü** (kupon/indirim) tamamlandı: `Coupon`/`CouponRedemption`, checkout orkestrasyonuna (`CreateOrderCommandHandler`) stok rezervasyonundan sonraki üçüncü adım olarak eklendi (Inventory'nin Reserve/Release deseninin kupon kullanımına uygulanışı — bkz. TASKS.md Faz 3 detayı). **Review modülü** (ürün yorumu/puanlama) de tamamlandı: satın alma doğrulaması Order+Catalog'u aynı anda okuyan ilk çok-modüllü okuma zinciri, moderasyon basit bir `IsApproved` boolean gate. Sıradaki iş Shipping. Detay ve tam sıralama için [TASKS.md](./TASKS.md).
+**Faz 3 tamamlandı** — **Promotion modülü** (kupon/indirim): `Coupon`/`CouponRedemption`, checkout orkestrasyonuna (`CreateOrderCommandHandler`) stok rezervasyonundan sonraki üçüncü adım olarak eklendi (Inventory'nin Reserve/Release deseninin kupon kullanımına uygulanışı). **Review modülü** (ürün yorumu/puanlama): satın alma doğrulaması Order+Catalog'u aynı anda okuyan ilk çok-modüllü okuma zinciri, moderasyon basit bir `IsApproved` boolean gate. **Shipping modülü** (kargo takibi): Order'daki `mark-shipped`/`mark-delivered` admin-only stand-in uçları gerçek çağrıcılarına kavuştu (`CreateShipmentCommandHandler`/`MarkShipmentDeliveredCommandHandler` mevcut `MarkOrderAsShippedCommand`/`MarkOrderAsDeliveredCommand`'ı çağırıyor — Payment'ın `MarkOrderAsPaidCommand`'ı çağırma deseninin dördüncü tekrarı, Order'da hiç yeni kod yazılmadı). Bkz. TASKS.md Faz 3 detayları. Sıradaki iş **Faz 4** (Payment'ı mikroservise çıkarma) — detay ve tam sıralama için [TASKS.md](./TASKS.md).
 
 ## Geliştirme Döngüsü
 
@@ -85,7 +85,7 @@ Kullanıcı Fatih Çakıroğlu'nun ~40-50 saatlik Udemy mikroservis kursunun **t
 | **Payment** | Ödeme (önce monolith içi, sonra mikroservis) | Faz 2 tamamlandı (mock gateway) → Faz 4'te çıkarılır, Faz 7'de iyzico |
 | **Promotion** | Kupon/indirim | Faz 3 tamamlandı |
 | **Review** | Ürün yorumu/puanlama (satın alma doğrulamalı) | Faz 3 tamamlandı |
-| **Shipping** | Kargo takibi | Faz 3 |
+| **Shipping** | Kargo takibi | Faz 3 tamamlandı |
 
 Modül bazında tablo isimleri ve gerekçeleri için TASKS.md'deki ilgili faz maddelerine bakılabilir (her modülün tabloları orada özetlendi). Kolon seviyesi detay henüz sadece Identity için koda döküldü; diğer modüller için görev başladığında (Planla adımında) netleştirilecek.
 

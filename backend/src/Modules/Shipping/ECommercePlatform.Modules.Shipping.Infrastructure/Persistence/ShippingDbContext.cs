@@ -7,6 +7,10 @@ public sealed class ShippingDbContext(DbContextOptions<ShippingDbContext> option
 {
     public const string Schema = "shipping";
 
+    public DbSet<Domain.Shipment> Shipments => Set<Domain.Shipment>();
+
+    public DbSet<Domain.ShipmentStatusHistory> ShipmentStatusHistory => Set<Domain.ShipmentStatusHistory>();
+
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {
         modelBuilder.HasDefaultSchema(Schema);

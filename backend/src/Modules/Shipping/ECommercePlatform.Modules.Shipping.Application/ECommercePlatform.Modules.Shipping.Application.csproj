@@ -3,6 +3,10 @@
   <ItemGroup>
     <ProjectReference Include="..\ECommercePlatform.Modules.Shipping.Domain\ECommercePlatform.Modules.Shipping.Domain.csproj" />
     <ProjectReference Include="..\..\..\BuildingBlocks\ECommercePlatform.BuildingBlocks.Application\ECommercePlatform.BuildingBlocks.Application.csproj" />
+    <!-- CreateShipmentCommandHandler validates the order is Preparing and then drives it to Shipped;
+         MarkShipmentDeliveredCommandHandler drives it to Delivered — both reuse Order's existing
+         MarkOrderAsShipped/DeliveredCommand rather than adding new Order code. -->
+    <ProjectReference Include="..\..\Order\ECommercePlatform.Modules.Order.Application\ECommercePlatform.Modules.Order.Application.csproj" />
   </ItemGroup>
 
   <PropertyGroup>
