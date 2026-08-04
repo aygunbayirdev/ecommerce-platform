@@ -1,10 +1,19 @@
-export default function HomePage() {
+import { CategoryNav } from '@/components/catalog/CategoryNav'
+import { ProductGrid } from '@/components/catalog/ProductGrid'
+import { getCategories } from '@/features/catalog/api/getCategories'
+import { getProducts } from '@/features/catalog/api/getProducts'
+
+export default async function HomePage() {
+  const [categories, products] = await Promise.all([getCategories(), getProducts({})])
+
   return (
-    <div className="mx-auto max-w-6xl px-4 py-16">
-      <h1 className="text-3xl font-bold tracking-tight">ECommercePlatform</h1>
-      <p className="mt-2 text-muted-foreground">
-        Ürün listeleme ana sayfası bir sonraki adımda eklenecek.
-      </p>
+    <div className="mx-auto max-w-6xl space-y-6 px-4 py-8">
+      <div className="space-y-2">
+        <h1 className="text-2xl font-bold tracking-tight">Ürünler</h1>
+        <CategoryNav categories={categories} />
+      </div>
+
+      <ProductGrid products={products.items} />
     </div>
-  );
+  )
 }

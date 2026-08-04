@@ -24,13 +24,13 @@ public sealed class ProductsController(ISender sender) : ControllerBase
     }
 
     [HttpGet]
-    public async Task<IActionResult> GetByCategory(
-        [FromQuery] Guid categoryId,
+    public async Task<IActionResult> GetAll(
+        [FromQuery] Guid? categoryId,
         [FromQuery] int pageNumber = 1,
         [FromQuery] int pageSize = 20,
         CancellationToken cancellationToken = default)
     {
-        var result = await sender.Send(new GetProductsByCategoryQuery(categoryId, pageNumber, pageSize), cancellationToken);
+        var result = await sender.Send(new GetProductsQuery(categoryId, pageNumber, pageSize), cancellationToken);
 
         return result.IsSuccess ? Ok(result.Value) : result.ToProblemDetails();
     }

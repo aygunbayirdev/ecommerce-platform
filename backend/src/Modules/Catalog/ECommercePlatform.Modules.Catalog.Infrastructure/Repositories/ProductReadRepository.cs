@@ -87,11 +87,13 @@ internal sealed class ProductReadRepository(ISqlConnectionFactory connectionFact
             images);
     }
 
-    public async Task<PagedResult<ProductSummaryDto>> GetByCategoryIdAsync(
-        Guid categoryId, int pageNumber, int pageSize, CancellationToken cancellationToken)
+    public async Task<PagedResult<ProductSummaryDto>> GetAsync(
+        Guid? categoryId, int pageNumber, int pageSize, CancellationToken cancellationToken)
     {
         const string sql = """
-            SELECT COUNT(*) FROM catalog.products WHERE category_id = @CategoryId;
+            SELECT COUNT(*)
+            FROM catalog.products p
+            WHERE p.is_active = true AND (@CategoryId::uuid IS NULL OR p.category_id = @CategoryId);
 
             SELECT
                 p.id AS "Id",
@@ -102,7 +104,7 @@ internal sealed class ProductReadRepository(ISqlConnectionFactory connectionFact
                 (SELECT pi.url FROM catalog.product_images pi WHERE pi.product_id = p.id AND pi.is_primary = true LIMIT 1) AS "PrimaryImageUrl",
                 p.is_active AS "IsActive"
             FROM catalog.products p
-            WHERE p.category_id = @CategoryId
+            WHERE p.is_active = true AND (@CategoryId::uuid IS NULL OR p.category_id = @CategoryId)
             ORDER BY p.created_at_utc DESC
             LIMIT @PageSize OFFSET @Offset;
             """;

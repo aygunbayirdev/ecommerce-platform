@@ -4,5 +4,5 @@ using ECommercePlatform.Modules.Catalog.Application.Dtos;
 
 namespace ECommercePlatform.Modules.Catalog.Application.Products;
 
-public sealed record GetProductsByCategoryQuery(Guid CategoryId, int PageNumber, int PageSize)
+public sealed record GetProductsQuery(Guid? CategoryId, int PageNumber, int PageSize)
     : IQuery<PagedResult<ProductSummaryDto>>;
