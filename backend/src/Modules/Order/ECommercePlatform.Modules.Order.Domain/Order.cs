@@ -1,3 +1,4 @@
+using ECommercePlatform.IntegrationEvents;
 using ECommercePlatform.SharedKernel;
 
 namespace ECommercePlatform.Modules.Order.Domain;
@@ -99,7 +100,22 @@ public sealed class Order : BaseEntity
         return Result.Success();
     }
 
-    public Result MarkReadyForPayment() => TransitionTo(OrderStatus.PaymentPending, from: OrderStatus.Created, note: null);
+    /// <summary>
+    /// Raises the integration event that crosses process boundaries into Payment.Service (Faz 4 —
+    /// unlike every other transition in this class, which only matters in-process). Payment consumes
+    /// this to create its own local, Pending copy of the payment — it never calls back into Order.
+    /// </summary>
+    public Result MarkReadyForPayment()
+    {
+        var result = TransitionTo(OrderStatus.PaymentPending, from: OrderStatus.Created, note: null);
+
+        if (result.IsSuccess)
+        {
+            AddDomainEvent(new OrderReadyForPaymentIntegrationEvent(Id, UserId, Total));
+        }
+
+        return result;
+    }
 
     public Result MarkAsPaid() => TransitionTo(OrderStatus.Paid, from: OrderStatus.PaymentPending, note: null);
 

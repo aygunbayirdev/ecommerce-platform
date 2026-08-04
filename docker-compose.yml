@@ -16,22 +16,90 @@ services:
       timeout: 5s
       retries: 10
 
+  rabbitmq:
+    image: rabbitmq:4-management
+    container_name: ecommerce-rabbitmq
+    environment:
+      RABBITMQ_DEFAULT_USER: ${RABBITMQ_USER}
+      RABBITMQ_DEFAULT_PASS: ${RABBITMQ_PASSWORD}
+    ports:
+      - "5672:5672"   # AMQP
+      - "15672:15672" # management UI (http://localhost:15672)
+    volumes:
+      - rabbitmq-data:/var/lib/rabbitmq
+    healthcheck:
+      test: ["CMD", "rabbitmq-diagnostics", "-q", "ping"]
+      interval: 10s
+      timeout: 5s
+      retries: 10
+
   backend:
     build:
-      context: ./backend
-      dockerfile: Dockerfile
+      context: .
+      dockerfile: backend/Dockerfile
     container_name: ecommerce-backend
     depends_on:
       postgres:
+        condition: service_healthy
+      rabbitmq:
         condition: service_healthy
     environment:
       ConnectionStrings__Default: "Host=postgres;Port=5432;Database=${POSTGRES_DB};Username=${POSTGRES_USER};Password=${POSTGRES_PASSWORD}"
       Jwt__Issuer: ${JWT_ISSUER}
       Jwt__Audience: ${JWT_AUDIENCE}
       Jwt__SigningKey: ${JWT_SIGNING_KEY}
+      RabbitMq__HostName: rabbitmq
+      RabbitMq__Port: 5672
+      RabbitMq__UserName: ${RABBITMQ_USER}
+      RabbitMq__Password: ${RABBITMQ_PASSWORD}
       ASPNETCORE_ENVIRONMENT: Development
     ports:
       - "8080:8080"
 
+  payment-postgres:
+    image: postgres:17
+    container_name: payment-postgres
+    environment:
+      POSTGRES_DB: ${PAYMENT_POSTGRES_DB}
+      POSTGRES_USER: ${PAYMENT_POSTGRES_USER}
+      POSTGRES_PASSWORD: ${PAYMENT_POSTGRES_PASSWORD}
+    ports:
+      - "5434:5432"
+    volumes:
+      - payment-postgres-data:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U ${PAYMENT_POSTGRES_USER} -d ${PAYMENT_POSTGRES_DB}"]
+      interval: 5s
+      timeout: 5s
+      retries: 10
+
+  payment-service:
+    build:
+      context: .
+      dockerfile: payment-service/Dockerfile
+    container_name: payment-service
+    depends_on:
+      payment-postgres:
+        condition: service_healthy
+      rabbitmq:
+        condition: service_healthy
+    environment:
+      # Own database — a separate deploy unit's whole point is not sharing a schema with the monolith.
+      ConnectionStrings__Default: "Host=payment-postgres;Port=5432;Database=${PAYMENT_POSTGRES_DB};Username=${PAYMENT_POSTGRES_USER};Password=${PAYMENT_POSTGRES_PASSWORD}"
+      # Same Issuer/Audience/SigningKey as the monolith on purpose — stateless JWT means Payment.Service
+      # validates tokens locally without ever calling Identity (CLAUDE.md madde 8).
+      Jwt__Issuer: ${JWT_ISSUER}
+      Jwt__Audience: ${JWT_AUDIENCE}
+      Jwt__SigningKey: ${JWT_SIGNING_KEY}
+      RabbitMq__HostName: rabbitmq
+      RabbitMq__Port: 5672
+      RabbitMq__UserName: ${RABBITMQ_USER}
+      RabbitMq__Password: ${RABBITMQ_PASSWORD}
+      ASPNETCORE_ENVIRONMENT: Development
+    ports:
+      - "8081:8080"
+
 volumes:
   postgres-data:
+  rabbitmq-data:
+  payment-postgres-data:

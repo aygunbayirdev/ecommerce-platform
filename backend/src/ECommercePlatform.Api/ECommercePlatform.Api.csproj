@@ -21,11 +21,12 @@
     <ProjectReference Include="..\Modules\Inventory\ECommercePlatform.Modules.Inventory.Infrastructure\ECommercePlatform.Modules.Inventory.Infrastructure.csproj" />
     <ProjectReference Include="..\Modules\Cart\ECommercePlatform.Modules.Cart.Infrastructure\ECommercePlatform.Modules.Cart.Infrastructure.csproj" />
     <ProjectReference Include="..\Modules\Order\ECommercePlatform.Modules.Order.Infrastructure\ECommercePlatform.Modules.Order.Infrastructure.csproj" />
-    <ProjectReference Include="..\Modules\Payment\ECommercePlatform.Modules.Payment.Infrastructure\ECommercePlatform.Modules.Payment.Infrastructure.csproj" />
+    <!-- Payment.Infrastructure is gone (Faz 4 — extracted to payment-service/, own deploy unit, own DB). -->
     <ProjectReference Include="..\Modules\Shipping\ECommercePlatform.Modules.Shipping.Infrastructure\ECommercePlatform.Modules.Shipping.Infrastructure.csproj" />
     <ProjectReference Include="..\Modules\Promotion\ECommercePlatform.Modules.Promotion.Infrastructure\ECommercePlatform.Modules.Promotion.Infrastructure.csproj" />
     <ProjectReference Include="..\Modules\Review\ECommercePlatform.Modules.Review.Infrastructure\ECommercePlatform.Modules.Review.Infrastructure.csproj" />
     <ProjectReference Include="..\BuildingBlocks\ECommercePlatform.BuildingBlocks.Application\ECommercePlatform.BuildingBlocks.Application.csproj" />
+    <ProjectReference Include="..\BuildingBlocks\ECommercePlatform.BuildingBlocks.Messaging\ECommercePlatform.BuildingBlocks.Messaging.csproj" />
   </ItemGroup>
 
 </Project>

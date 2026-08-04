@@ -2,6 +2,9 @@
 
   <ItemGroup>
     <ProjectReference Include="..\..\..\ECommercePlatform.SharedKernel\ECommercePlatform.SharedKernel.csproj" />
+    <!-- Order.MarkReadyForPayment() raises OrderReadyForPaymentIntegrationEvent — the integration
+         event contract shared with Payment.Service (see Faz 4). -->
+    <ProjectReference Include="..\..\..\..\..\contracts\ECommercePlatform.IntegrationEvents\ECommercePlatform.IntegrationEvents.csproj" />
   </ItemGroup>
 
   <PropertyGroup>

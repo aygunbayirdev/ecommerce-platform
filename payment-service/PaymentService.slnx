@@ -1,0 +1,20 @@
+<Solution>
+  <Folder Name="/contracts/">
+    <Project Path="../contracts/ECommercePlatform.IntegrationEvents/ECommercePlatform.IntegrationEvents.csproj" />
+  </Folder>
+  <Folder Name="/platform/">
+    <Project Path="../backend/src/ECommercePlatform.SharedKernel/ECommercePlatform.SharedKernel.csproj" />
+    <Project Path="../backend/src/BuildingBlocks/ECommercePlatform.BuildingBlocks.Application/ECommercePlatform.BuildingBlocks.Application.csproj" />
+    <Project Path="../backend/src/BuildingBlocks/ECommercePlatform.BuildingBlocks.Infrastructure/ECommercePlatform.BuildingBlocks.Infrastructure.csproj" />
+    <Project Path="../backend/src/BuildingBlocks/ECommercePlatform.BuildingBlocks.Messaging/ECommercePlatform.BuildingBlocks.Messaging.csproj" />
+  </Folder>
+  <Folder Name="/src/">
+    <Project Path="src/ECommercePlatform.PaymentService.Api/ECommercePlatform.PaymentService.Api.csproj" />
+    <Project Path="src/Modules/Payment/ECommercePlatform.Modules.Payment.Domain/ECommercePlatform.Modules.Payment.Domain.csproj" />
+    <Project Path="src/Modules/Payment/ECommercePlatform.Modules.Payment.Application/ECommercePlatform.Modules.Payment.Application.csproj" />
+    <Project Path="src/Modules/Payment/ECommercePlatform.Modules.Payment.Infrastructure/ECommercePlatform.Modules.Payment.Infrastructure.csproj" />
+  </Folder>
+  <Folder Name="/tests/">
+    <Project Path="tests/ECommercePlatform.Modules.Payment.UnitTests/ECommercePlatform.Modules.Payment.UnitTests.csproj" />
+  </Folder>
+</Solution>

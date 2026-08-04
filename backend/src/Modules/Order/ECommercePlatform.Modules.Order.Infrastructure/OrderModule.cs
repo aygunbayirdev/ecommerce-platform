@@ -1,10 +1,14 @@
 using ECommercePlatform.BuildingBlocks.Infrastructure;
 using ECommercePlatform.BuildingBlocks.Infrastructure.Outbox;
+using ECommercePlatform.BuildingBlocks.Messaging;
+using ECommercePlatform.IntegrationEvents;
 using ECommercePlatform.Modules.Order.Application;
 using ECommercePlatform.Modules.Order.Application.Abstractions;
+using ECommercePlatform.Modules.Order.Application.Orders;
 using ECommercePlatform.Modules.Order.Infrastructure.Persistence;
 using ECommercePlatform.Modules.Order.Infrastructure.Repositories;
 using FluentValidation;
+using MediatR;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
@@ -33,8 +37,21 @@ public static class OrderModule
         services.AddMediatR(cfg => cfg.RegisterServicesFromAssembly(typeof(OrderApplicationAssemblyMarker).Assembly));
         services.AddValidatorsFromAssembly(typeof(OrderApplicationAssemblyMarker).Assembly);
 
-        // No AddOutboxProcessor<OrderDbContext>() yet — this module has no entities/domain events
-        // to process. Register it once the module raises its first domain event (see TASKS.md).
+        // Unlike every other module's outbox (dispatched in-process via MediatR), 100% of Order's
+        // domain events are integration events meant to leave the process — Order.MarkReadyForPayment()
+        // is the only thing that ever raises one. So this outbox is wired straight to RabbitMQ instead
+        // of AddOutboxProcessor<OrderDbContext>() (see Faz 4 / CLAUDE.md madde 4).
+        services.AddRabbitMqOutboxPublisher<OrderDbContext>(queueName: "order-ready-for-payment");
+
+        // Symmetric consumer side: Payment.Service publishes this once a charge succeeds. Order
+        // never calls Payment — it only reacts to this event, same as it never called Payment before.
+        services.AddRabbitMqConsumer<PaymentSucceededIntegrationEvent>(
+            queueName: "payment-succeeded",
+            handleAsync: async (message, sp, cancellationToken) =>
+            {
+                var sender = sp.GetRequiredService<ISender>();
+                await sender.Send(new MarkOrderAsPaidCommand(message.OrderId), cancellationToken);
+            });
 
         return services;
     }

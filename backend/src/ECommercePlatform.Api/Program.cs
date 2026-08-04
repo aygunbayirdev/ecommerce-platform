@@ -2,12 +2,12 @@ using System.Text;
 using ECommercePlatform.BuildingBlocks.Application;
 using ECommercePlatform.BuildingBlocks.Infrastructure;
 using ECommercePlatform.BuildingBlocks.Infrastructure.Security;
+using ECommercePlatform.BuildingBlocks.Messaging;
 using ECommercePlatform.Modules.Cart.Infrastructure;
 using ECommercePlatform.Modules.Catalog.Infrastructure;
 using ECommercePlatform.Modules.Identity.Infrastructure;
 using ECommercePlatform.Modules.Inventory.Infrastructure;
 using ECommercePlatform.Modules.Order.Infrastructure;
-using ECommercePlatform.Modules.Payment.Infrastructure;
 using ECommercePlatform.Modules.Promotion.Infrastructure;
 using ECommercePlatform.Modules.Review.Infrastructure;
 using ECommercePlatform.Modules.Shipping.Infrastructure;
@@ -30,6 +30,8 @@ builder.Services.AddSqlConnectionFactory(connectionString);
 
 builder.Services.Configure<JwtOptions>(builder.Configuration.GetSection(JwtOptions.SectionName));
 
+builder.Services.AddRabbitMqMessaging(builder.Configuration);
+
 // Modules — walking skeleton: only Identity is fully implemented, the rest register an empty
 // DbContext + module-scoped MediatR/FluentValidation pipeline so the DI graph is proven end to end.
 builder.Services.AddIdentityModule(builder.Configuration);
@@ -37,7 +39,6 @@ builder.Services.AddCatalogModule(builder.Configuration);
 builder.Services.AddInventoryModule(builder.Configuration);
 builder.Services.AddCartModule(builder.Configuration);
 builder.Services.AddOrderModule(builder.Configuration);
-builder.Services.AddPaymentModule(builder.Configuration);
 builder.Services.AddShippingModule(builder.Configuration);
 builder.Services.AddPromotionModule(builder.Configuration);
 builder.Services.AddReviewModule(builder.Configuration);

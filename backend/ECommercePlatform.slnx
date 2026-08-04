@@ -1,7 +1,11 @@
 <Solution>
+  <Folder Name="/contracts/">
+    <Project Path="../contracts/ECommercePlatform.IntegrationEvents/ECommercePlatform.IntegrationEvents.csproj" />
+  </Folder>
   <Folder Name="/src/">
     <Project Path="src/BuildingBlocks/ECommercePlatform.BuildingBlocks.Application/ECommercePlatform.BuildingBlocks.Application.csproj" />
     <Project Path="src/BuildingBlocks/ECommercePlatform.BuildingBlocks.Infrastructure/ECommercePlatform.BuildingBlocks.Infrastructure.csproj" />
+    <Project Path="src/BuildingBlocks/ECommercePlatform.BuildingBlocks.Messaging/ECommercePlatform.BuildingBlocks.Messaging.csproj" />
     <Project Path="src/ECommercePlatform.Api/ECommercePlatform.Api.csproj" />
     <Project Path="src/ECommercePlatform.SharedKernel/ECommercePlatform.SharedKernel.csproj" />
     <Project Path="src/Modules/Cart/ECommercePlatform.Modules.Cart.Application/ECommercePlatform.Modules.Cart.Application.csproj" />
@@ -19,9 +23,6 @@
     <Project Path="src/Modules/Order/ECommercePlatform.Modules.Order.Application/ECommercePlatform.Modules.Order.Application.csproj" />
     <Project Path="src/Modules/Order/ECommercePlatform.Modules.Order.Domain/ECommercePlatform.Modules.Order.Domain.csproj" />
     <Project Path="src/Modules/Order/ECommercePlatform.Modules.Order.Infrastructure/ECommercePlatform.Modules.Order.Infrastructure.csproj" />
-    <Project Path="src/Modules/Payment/ECommercePlatform.Modules.Payment.Application/ECommercePlatform.Modules.Payment.Application.csproj" />
-    <Project Path="src/Modules/Payment/ECommercePlatform.Modules.Payment.Domain/ECommercePlatform.Modules.Payment.Domain.csproj" />
-    <Project Path="src/Modules/Payment/ECommercePlatform.Modules.Payment.Infrastructure/ECommercePlatform.Modules.Payment.Infrastructure.csproj" />
     <Project Path="src/Modules/Promotion/ECommercePlatform.Modules.Promotion.Application/ECommercePlatform.Modules.Promotion.Application.csproj" />
     <Project Path="src/Modules/Promotion/ECommercePlatform.Modules.Promotion.Domain/ECommercePlatform.Modules.Promotion.Domain.csproj" />
     <Project Path="src/Modules/Promotion/ECommercePlatform.Modules.Promotion.Infrastructure/ECommercePlatform.Modules.Promotion.Infrastructure.csproj" />
@@ -38,7 +39,6 @@
     <Project Path="tests/ECommercePlatform.Modules.Catalog.UnitTests/ECommercePlatform.Modules.Catalog.UnitTests.csproj" />
     <Project Path="tests/ECommercePlatform.Modules.Inventory.UnitTests/ECommercePlatform.Modules.Inventory.UnitTests.csproj" />
     <Project Path="tests/ECommercePlatform.Modules.Order.UnitTests/ECommercePlatform.Modules.Order.UnitTests.csproj" />
-    <Project Path="tests/ECommercePlatform.Modules.Payment.UnitTests/ECommercePlatform.Modules.Payment.UnitTests.csproj" />
     <Project Path="tests/ECommercePlatform.Modules.Promotion.UnitTests/ECommercePlatform.Modules.Promotion.UnitTests.csproj" />
     <Project Path="tests/ECommercePlatform.Modules.Review.UnitTests/ECommercePlatform.Modules.Review.UnitTests.csproj" />
     <Project Path="tests/ECommercePlatform.Modules.Shipping.UnitTests/ECommercePlatform.Modules.Shipping.UnitTests.csproj" />

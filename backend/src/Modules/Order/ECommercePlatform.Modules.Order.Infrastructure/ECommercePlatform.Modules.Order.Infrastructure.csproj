@@ -3,6 +3,9 @@
   <ItemGroup>
     <ProjectReference Include="..\ECommercePlatform.Modules.Order.Application\ECommercePlatform.Modules.Order.Application.csproj" />
     <ProjectReference Include="..\..\..\BuildingBlocks\ECommercePlatform.BuildingBlocks.Infrastructure\ECommercePlatform.BuildingBlocks.Infrastructure.csproj" />
+    <!-- RabbitMqOutboxPublisher<OrderDbContext> (publishing) + RabbitMqConsumerBackgroundService (consuming PaymentSucceeded) — see Faz 4. -->
+    <ProjectReference Include="..\..\..\BuildingBlocks\ECommercePlatform.BuildingBlocks.Messaging\ECommercePlatform.BuildingBlocks.Messaging.csproj" />
+    <ProjectReference Include="..\..\..\..\..\contracts\ECommercePlatform.IntegrationEvents\ECommercePlatform.IntegrationEvents.csproj" />
   </ItemGroup>
 
   <ItemGroup>

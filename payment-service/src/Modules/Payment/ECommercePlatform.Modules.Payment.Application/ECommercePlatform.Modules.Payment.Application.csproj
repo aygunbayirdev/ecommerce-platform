@@ -1,0 +1,18 @@
+﻿<Project Sdk="Microsoft.NET.Sdk">
+
+  <ItemGroup>
+    <ProjectReference Include="..\ECommercePlatform.Modules.Payment.Domain\ECommercePlatform.Modules.Payment.Domain.csproj" />
+    <!-- No reference to Order.Application (or anything else in backend/) anymore — this is the whole
+         point of the Faz 4 extraction. ProcessPaymentCommandHandler reads/writes its own local
+         Payment record only; ownership and amount arrive via OrderReadyForPaymentIntegrationEvent
+         (consumed in Infrastructure), not a synchronous call back into the monolith. -->
+    <ProjectReference Include="..\..\..\..\..\backend\src\BuildingBlocks\ECommercePlatform.BuildingBlocks.Application\ECommercePlatform.BuildingBlocks.Application.csproj" />
+  </ItemGroup>
+
+  <PropertyGroup>
+    <TargetFramework>net10.0</TargetFramework>
+    <ImplicitUsings>enable</ImplicitUsings>
+    <Nullable>enable</Nullable>
+  </PropertyGroup>
+
+</Project>

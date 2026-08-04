@@ -1,0 +1,18 @@
+﻿<Project Sdk="Microsoft.NET.Sdk">
+
+  <ItemGroup>
+    <!-- SharedKernel/IntegrationEvents physically live under backend/ and contracts/ (repo root) —
+         see Faz 4: this is a deliberate trade-off, not moving them avoids touching every other
+         module's import paths for a low-value structural cleanup. -->
+    <ProjectReference Include="..\..\..\..\..\backend\src\ECommercePlatform.SharedKernel\ECommercePlatform.SharedKernel.csproj" />
+    <!-- Payment.Attempt() raises PaymentSucceededIntegrationEvent on a successful charge. -->
+    <ProjectReference Include="..\..\..\..\..\contracts\ECommercePlatform.IntegrationEvents\ECommercePlatform.IntegrationEvents.csproj" />
+  </ItemGroup>
+
+  <PropertyGroup>
+    <TargetFramework>net10.0</TargetFramework>
+    <ImplicitUsings>enable</ImplicitUsings>
+    <Nullable>enable</Nullable>
+  </PropertyGroup>
+
+</Project>
