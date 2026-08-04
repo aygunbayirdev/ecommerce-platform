@@ -20,7 +20,7 @@ public sealed class AddItemToCartCommandHandlerTests
     }
 
     private static ProductVariantSummaryDto Summary(Guid variantId, bool isActive = true)
-        => new(variantId, "Telefon", "SKU-1", 100m, null, isActive);
+        => new(variantId, "Telefon", "SKU-1", 100m, null, isActive, Guid.NewGuid());
 
     [Fact]
     public async Task Handle_ShouldReturnNotFound_WhenCartDoesNotExist()

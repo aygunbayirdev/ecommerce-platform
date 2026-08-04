@@ -7,6 +7,8 @@ public sealed class ReviewDbContext(DbContextOptions<ReviewDbContext> options) :
 {
     public const string Schema = "review";
 
+    public DbSet<Domain.Review> Reviews => Set<Domain.Review>();
+
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {
         modelBuilder.HasDefaultSchema(Schema);

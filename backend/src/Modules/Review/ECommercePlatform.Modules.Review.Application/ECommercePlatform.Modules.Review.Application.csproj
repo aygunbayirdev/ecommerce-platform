@@ -3,6 +3,11 @@
   <ItemGroup>
     <ProjectReference Include="..\ECommercePlatform.Modules.Review.Domain\ECommercePlatform.Modules.Review.Domain.csproj" />
     <ProjectReference Include="..\..\..\BuildingBlocks\ECommercePlatform.BuildingBlocks.Application\ECommercePlatform.BuildingBlocks.Application.csproj" />
+    <!-- CreateReviewCommandHandler verifies "did this user actually buy this product" by reading
+         both Order (ownership + purchase-completed status) and Catalog (variant -> product
+         resolution) via ISender — a read-only, two-module verification chain. -->
+    <ProjectReference Include="..\..\Order\ECommercePlatform.Modules.Order.Application\ECommercePlatform.Modules.Order.Application.csproj" />
+    <ProjectReference Include="..\..\Catalog\ECommercePlatform.Modules.Catalog.Application\ECommercePlatform.Modules.Catalog.Application.csproj" />
   </ItemGroup>
 
   <PropertyGroup>

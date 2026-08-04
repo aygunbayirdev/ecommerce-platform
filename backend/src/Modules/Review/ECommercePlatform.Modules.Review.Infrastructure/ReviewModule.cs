@@ -1,7 +1,9 @@
 using ECommercePlatform.BuildingBlocks.Infrastructure;
 using ECommercePlatform.BuildingBlocks.Infrastructure.Outbox;
 using ECommercePlatform.Modules.Review.Application;
+using ECommercePlatform.Modules.Review.Application.Abstractions;
 using ECommercePlatform.Modules.Review.Infrastructure.Persistence;
+using ECommercePlatform.Modules.Review.Infrastructure.Repositories;
 using FluentValidation;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
@@ -24,6 +26,9 @@ public static class ReviewModule
                     npgsqlOptions.MigrationsHistoryTable("__ef_migrations_history", ReviewDbContext.Schema))
                 .UseSnakeCaseNamingConvention()
                 .AddInterceptors(sp.GetRequiredService<OutboxWritingInterceptor>()));
+
+        services.AddScoped<IReviewWriteRepository, ReviewWriteRepository>();
+        services.AddScoped<IReviewReadRepository, ReviewReadRepository>();
 
         services.AddMediatR(cfg => cfg.RegisterServicesFromAssembly(typeof(ReviewApplicationAssemblyMarker).Assembly));
         services.AddValidatorsFromAssembly(typeof(ReviewApplicationAssemblyMarker).Assembly);

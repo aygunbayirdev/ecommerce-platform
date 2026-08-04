@@ -6,4 +6,5 @@ public sealed record ProductVariantSummaryDto(
     string Sku,
     decimal Price,
     string? ImageUrl,
-    bool IsActive);
+    bool IsActive,
+    Guid ProductId);

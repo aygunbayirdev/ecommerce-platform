@@ -138,7 +138,8 @@ internal sealed class ProductReadRepository(ISqlConnectionFactory connectionFact
                 pv.sku AS "Sku",
                 pv.price AS "Price",
                 (SELECT pi.url FROM catalog.product_images pi WHERE pi.product_id = p.id AND pi.is_primary = true LIMIT 1) AS "ImageUrl",
-                pv.is_active AS "IsActive"
+                pv.is_active AS "IsActive",
+                p.id AS "ProductId"
             FROM catalog.product_variants pv
             JOIN catalog.products p ON p.id = pv.product_id
             WHERE pv.id = ANY(@ProductVariantIds);
