@@ -4,6 +4,7 @@ import { LogOut, ShoppingCart, User } from 'lucide-react'
 import Link from 'next/link'
 import { useRouter } from 'next/navigation'
 
+import { Badge } from '@/components/ui/badge'
 import { Button } from '@/components/ui/button'
 import {
   DropdownMenu,
@@ -12,6 +13,7 @@ import {
   DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from '@/components/ui/dropdown-menu'
+import { useCart } from '@/features/cart/api/useCart'
 import { useAuthStore } from '@/features/auth/store'
 import { useCurrentUser } from '@/hooks/useCurrentUser'
 
@@ -19,6 +21,8 @@ export function SiteHeader() {
   const router = useRouter()
   const user = useCurrentUser()
   const clear = useAuthStore((state) => state.clear)
+  const { data: cart } = useCart()
+  const itemCount = cart?.items.reduce((sum, item) => sum + item.quantity, 0) ?? 0
 
   function handleLogout() {
     clear()
@@ -38,9 +42,14 @@ export function SiteHeader() {
             size="icon"
             aria-label="Sepetim"
             nativeButton={false}
-            render={<Link href="/cart" />}
+            render={<Link href="/cart" className="relative" />}
           >
             <ShoppingCart className="size-5" />
+            {itemCount > 0 && (
+              <Badge className="absolute -top-1 -right-1 h-4 min-w-4 justify-center px-1 text-[10px]">
+                {itemCount}
+              </Badge>
+            )}
           </Button>
 
           {user ? (

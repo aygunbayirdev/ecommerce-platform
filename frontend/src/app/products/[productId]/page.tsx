@@ -1,9 +1,9 @@
 import { notFound } from 'next/navigation'
 
+import { AddToCartForm } from '@/components/cart/AddToCartForm'
 import { ProductGallery } from '@/components/catalog/ProductGallery'
 import { ReviewList } from '@/components/catalog/ReviewList'
 import { Separator } from '@/components/ui/separator'
-import { VariantList } from '@/components/catalog/VariantList'
 import { getProductById } from '@/features/catalog/api/getProductById'
 import { getApprovedReviews } from '@/features/reviews/api/getApprovedReviews'
 
@@ -34,7 +34,7 @@ export default async function ProductDetailPage({
             <p className="whitespace-pre-line text-muted-foreground">{product.description}</p>
           </div>
 
-          <VariantList variants={product.variants} />
+          <AddToCartForm variants={product.variants} />
         </div>
       </div>
 
