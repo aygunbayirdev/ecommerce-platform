@@ -45,3 +45,11 @@ export type CreateOrderRequest = {
   addressId: string
   couponCode?: string
 }
+
+export type OrderSummary = {
+  id: string
+  orderNumber: string
+  status: OrderStatus
+  total: number
+  createdAtUtc: string
+}
