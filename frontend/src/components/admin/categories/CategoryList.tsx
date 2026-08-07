@@ -19,7 +19,7 @@ export function CategoryList({ categories }: { categories: Category[] }) {
   return (
     <div className="space-y-2">
       {sorted.map((category) => (
-        <div key={category.id} className="flex items-center justify-between gap-3 rounded-lg border p-3">
+        <div key={category.id} className="flex flex-wrap items-center justify-between gap-y-2 gap-x-3 rounded-lg border p-3">
           <div className="flex items-center gap-2">
             <span className="font-medium">{categoryLabel(category, categories)}</span>
             <Badge variant="outline">Sıra: {category.displayOrder}</Badge>

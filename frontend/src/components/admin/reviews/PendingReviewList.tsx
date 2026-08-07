@@ -35,7 +35,7 @@ export function PendingReviewList({ reviews }: { reviews: ReviewAdmin[] }) {
     <div className="space-y-3">
       {reviews.map((review) => (
         <div key={review.id} className="space-y-2 rounded-lg border p-4">
-          <div className="flex items-center justify-between">
+          <div className="flex flex-wrap items-center justify-between gap-y-2">
             <div>
               <p className="font-medium">{review.productName}</p>
               <p className="text-sm text-muted-foreground">

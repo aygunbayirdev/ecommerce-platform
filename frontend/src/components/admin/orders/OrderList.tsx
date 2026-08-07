@@ -16,7 +16,7 @@ export function OrderList({ orders }: { orders: OrderSummary[] }) {
         <Link
           key={order.id}
           href={`/admin/orders/${order.id}`}
-          className="flex items-center justify-between gap-4 rounded-lg border p-3 transition-colors hover:bg-muted"
+          className="flex flex-wrap items-center justify-between gap-y-2 gap-x-4 rounded-lg border p-3 transition-colors hover:bg-muted"
         >
           <div className="space-y-1">
             <p className="font-medium">#{order.orderNumber}</p>

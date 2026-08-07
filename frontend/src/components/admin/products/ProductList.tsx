@@ -15,7 +15,7 @@ export function ProductList({ products, categories }: { products: ProductSummary
         <Link
           key={product.id}
           href={`/admin/products/${product.id}`}
-          className="flex items-center justify-between gap-3 rounded-lg border p-3 transition-colors hover:bg-muted"
+          className="flex flex-wrap items-center justify-between gap-y-2 gap-x-3 rounded-lg border p-3 transition-colors hover:bg-muted"
         >
           <div className="flex items-center gap-3">
             {product.primaryImageUrl ? (

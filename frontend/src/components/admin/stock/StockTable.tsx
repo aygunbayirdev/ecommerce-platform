@@ -12,7 +12,7 @@ export function StockTable({ items }: { items: StockItemWithProduct[] }) {
   return (
     <div className="space-y-2">
       {items.map((item) => (
-        <div key={item.id} className="flex items-center justify-between gap-3 rounded-lg border p-3">
+        <div key={item.id} className="flex flex-wrap items-center justify-between gap-y-2 gap-x-3 rounded-lg border p-3">
           <div>
             <p className="font-medium">{item.productName}</p>
             <p className="text-sm text-muted-foreground">

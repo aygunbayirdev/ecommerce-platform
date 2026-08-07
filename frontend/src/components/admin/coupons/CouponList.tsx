@@ -31,7 +31,7 @@ export function CouponList({ coupons }: { coupons: Coupon[] }) {
   return (
     <div className="space-y-2">
       {coupons.map((coupon) => (
-        <div key={coupon.id} className="flex items-center justify-between gap-3 rounded-lg border p-3">
+        <div key={coupon.id} className="flex flex-wrap items-center justify-between gap-y-2 gap-x-3 rounded-lg border p-3">
           <div>
             <p className="font-medium">
               {coupon.code} — {discountLabel(coupon)}

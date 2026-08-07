@@ -14,7 +14,7 @@ export function OrderListItem({ order }: { order: OrderSummary }) {
   return (
     <Link href={`/orders/${order.id}`}>
       <Card className="transition-shadow hover:shadow-md">
-        <CardContent className="flex items-center justify-between gap-4">
+        <CardContent className="flex flex-wrap items-center justify-between gap-y-2 gap-x-4">
           <div className="space-y-1">
             <p className="font-medium">#{order.orderNumber}</p>
             <p className="text-sm text-muted-foreground">{formatDate(order.createdAtUtc)}</p>
