@@ -7,6 +7,9 @@ import { Separator } from '@/components/ui/separator'
 import { getProductById } from '@/features/catalog/api/getProductById'
 import { getApprovedReviews } from '@/features/reviews/api/getApprovedReviews'
 
+// See app/page.tsx — same reasoning (always-fresh SSR, no build-time prerender attempt).
+export const dynamic = 'force-dynamic'
+
 export default async function ProductDetailPage({
   params,
 }: {

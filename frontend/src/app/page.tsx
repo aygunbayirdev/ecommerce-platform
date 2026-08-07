@@ -3,6 +3,10 @@ import { ProductGrid } from '@/components/catalog/ProductGrid'
 import { getCategories } from '@/features/catalog/api/getCategories'
 import { getProducts } from '@/features/catalog/api/getProducts'
 
+// Always render per-request — otherwise `next build` tries to prerender this at build time,
+// which fails outright in Docker (the backend container isn't reachable during image build).
+export const dynamic = 'force-dynamic'
+
 export default async function HomePage() {
   const [categories, products] = await Promise.all([getCategories(), getProducts({})])
 

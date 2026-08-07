@@ -5,6 +5,9 @@ import { ProductGrid } from '@/components/catalog/ProductGrid'
 import { getCategories } from '@/features/catalog/api/getCategories'
 import { getProducts } from '@/features/catalog/api/getProducts'
 
+// See app/page.tsx — same reasoning (always-fresh SSR, no build-time prerender attempt).
+export const dynamic = 'force-dynamic'
+
 export default async function CategoryPage({
   params,
 }: {
