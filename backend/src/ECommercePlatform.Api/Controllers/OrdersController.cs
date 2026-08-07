@@ -2,6 +2,7 @@ using System.IdentityModel.Tokens.Jwt;
 using System.Security.Claims;
 using ECommercePlatform.Api.Common;
 using ECommercePlatform.Modules.Order.Application.Orders;
+using ECommercePlatform.Modules.Order.Domain;
 using MediatR;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
@@ -54,10 +55,36 @@ public sealed class OrdersController(ISender sender) : ControllerBase
         return result.IsSuccess ? Ok(result.Value) : result.ToProblemDetails();
     }
 
+    // Admin-only counterpart to GetMine — spans every customer, optionally filtered by status,
+    // since an admin can't otherwise find an order without already knowing its id.
+    [HttpGet("all")]
+    [Authorize(Roles = "Admin")]
+    public async Task<IActionResult> GetAllForAdmin(
+        [FromQuery] OrderStatus? status,
+        [FromQuery] int pageNumber = 1,
+        [FromQuery] int pageSize = 20,
+        CancellationToken cancellationToken = default)
+    {
+        var result = await sender.Send(new GetAllOrdersForAdminQuery(status, pageNumber, pageSize), cancellationToken);
+
+        return result.IsSuccess ? Ok(result.Value) : result.ToProblemDetails();
+    }
+
     [HttpPost("{orderId:guid}/cancel")]
     public async Task<IActionResult> Cancel(Guid orderId, CancelOrderRequest request, CancellationToken cancellationToken)
     {
         var result = await sender.Send(new CancelMyOrderCommand(CurrentUserId, orderId, request.Reason), cancellationToken);
+
+        return result.IsSuccess ? NoContent() : result.ToProblemDetails();
+    }
+
+    // Separate from the customer-owned Cancel action above — no ownership check, admin can cancel
+    // any customer's order (e.g. a phone-in cancellation request).
+    [HttpPost("{orderId:guid}/admin-cancel")]
+    [Authorize(Roles = "Admin")]
+    public async Task<IActionResult> AdminCancel(Guid orderId, CancelOrderRequest request, CancellationToken cancellationToken)
+    {
+        var result = await sender.Send(new AdminCancelOrderCommand(orderId, request.Reason), cancellationToken);
 
         return result.IsSuccess ? NoContent() : result.ToProblemDetails();
     }

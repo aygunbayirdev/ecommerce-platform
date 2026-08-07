@@ -128,4 +128,27 @@ public sealed class CouponTests
         Assert.True(result.IsSuccess);
         Assert.Empty(coupon.Redemptions);
     }
+
+    [Fact]
+    public void Reactivate_ShouldSucceed_WhenCouponIsInactive()
+    {
+        var coupon = CreateCoupon();
+        coupon.Deactivate();
+
+        var result = coupon.Reactivate();
+
+        Assert.True(result.IsSuccess);
+        Assert.True(coupon.IsActive);
+    }
+
+    [Fact]
+    public void Reactivate_ShouldReturnConflict_WhenCouponAlreadyActive()
+    {
+        var coupon = CreateCoupon();
+
+        var result = coupon.Reactivate();
+
+        Assert.True(result.IsFailure);
+        Assert.Equal(ErrorType.Conflict, result.Error.Type);
+    }
 }

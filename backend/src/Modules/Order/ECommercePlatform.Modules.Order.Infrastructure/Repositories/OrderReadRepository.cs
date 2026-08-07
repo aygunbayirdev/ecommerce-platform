@@ -134,4 +134,50 @@ internal sealed class OrderReadRepository(ISqlConnectionFactory connectionFactor
             TotalCount = totalCount,
         };
     }
+
+    public async Task<PagedResult<OrderSummaryDto>> GetAllAsync(
+        OrderStatus? status, int pageNumber, int pageSize, CancellationToken cancellationToken)
+    {
+        // Status is stored as a plain integer column (EF Core's default enum mapping, no
+        // HasConversion configured in OrderConfiguration) — filtered as an int, not text.
+        const string sql = """
+            SELECT COUNT(*) FROM "order".orders o
+            WHERE @Status::int IS NULL OR o.status = @Status;
+
+            SELECT
+                o.id AS "Id",
+                o.order_number AS "OrderNumber",
+                o.status AS "Status",
+                GREATEST(0, (SELECT COALESCE(SUM(oi.unit_price * oi.quantity), 0) FROM "order".order_items oi WHERE oi.order_id = o.id) - o.discount_amount) AS "Total",
+                o.created_at_utc AS "CreatedAtUtc"
+            FROM "order".orders o
+            WHERE @Status::int IS NULL OR o.status = @Status
+            ORDER BY o.created_at_utc DESC
+            LIMIT @PageSize OFFSET @Offset;
+            """;
+
+        using IDbConnection connection = connectionFactory.CreateConnection();
+
+        var command = new CommandDefinition(
+            sql,
+            new { Status = (int?)status, PageSize = pageSize, Offset = (pageNumber - 1) * pageSize },
+            cancellationToken: cancellationToken);
+
+        using var multi = await connection.QueryMultipleAsync(command);
+
+        var totalCount = await multi.ReadSingleAsync<int>();
+        var rows = (await multi.ReadAsync<OrderSummaryRow>()).ToList();
+
+        var items = rows
+            .Select(r => new OrderSummaryDto(r.Id, r.OrderNumber, r.Status.ToString(), r.Total, r.CreatedAtUtc))
+            .ToList();
+
+        return new PagedResult<OrderSummaryDto>
+        {
+            Items = items,
+            PageNumber = pageNumber,
+            PageSize = pageSize,
+            TotalCount = totalCount,
+        };
+    }
 }

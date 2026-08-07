@@ -61,6 +61,18 @@ public sealed class Coupon : BaseEntity
         return Result.Success();
     }
 
+    public Result Reactivate()
+    {
+        if (IsActive)
+        {
+            return Result.Failure(Error.Conflict("Coupons.AlreadyActive", "Kupon zaten aktif durumda."));
+        }
+
+        IsActive = true;
+
+        return Result.Success();
+    }
+
     /// <summary>
     /// Pure business-rule check: does NOT mutate state or record a redemption. Used both as the
     /// first step of <see cref="Redeem"/> and, on its own, by anything that only needs to know

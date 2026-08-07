@@ -16,6 +16,14 @@ const NAV_SECTIONS = [
       { href: '/admin/stock', label: 'Stok' },
     ],
   },
+  {
+    title: 'Operasyon',
+    links: [
+      { href: '/admin/orders', label: 'Siparişler' },
+      { href: '/admin/coupons', label: 'Kuponlar' },
+      { href: '/admin/reviews', label: 'Yorumlar' },
+    ],
+  },
 ]
 
 export function AdminNav() {

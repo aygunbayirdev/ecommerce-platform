@@ -14,5 +14,7 @@ internal sealed class ReviewWriteRepository(ReviewDbContext dbContext) : IReview
 
     public void Add(Domain.Review review) => dbContext.Reviews.Add(review);
 
+    public void Remove(Domain.Review review) => dbContext.Reviews.Remove(review);
+
     public Task SaveChangesAsync(CancellationToken cancellationToken) => dbContext.SaveChangesAsync(cancellationToken);
 }

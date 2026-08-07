@@ -41,6 +41,14 @@ public sealed class CouponsController(ISender sender) : ControllerBase
         return result.IsSuccess ? NoContent() : result.ToProblemDetails();
     }
 
+    [HttpPost("{couponId:guid}/reactivate")]
+    public async Task<IActionResult> Reactivate(Guid couponId, CancellationToken cancellationToken)
+    {
+        var result = await sender.Send(new ReactivateCouponCommand(couponId), cancellationToken);
+
+        return result.IsSuccess ? NoContent() : result.ToProblemDetails();
+    }
+
     [HttpGet]
     public async Task<IActionResult> GetAll(
         [FromQuery] int pageNumber = 1, [FromQuery] int pageSize = 20, CancellationToken cancellationToken = default)

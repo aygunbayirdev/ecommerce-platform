@@ -8,5 +8,7 @@ public interface IReviewWriteRepository
 
     void Add(Domain.Review review);
 
+    void Remove(Domain.Review review);
+
     Task SaveChangesAsync(CancellationToken cancellationToken);
 }
