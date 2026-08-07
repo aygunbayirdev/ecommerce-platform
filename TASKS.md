@@ -141,7 +141,7 @@ Projenin asıl öğrenme amacı. Bkz. CLAUDE.md madde 2 ve 4 (Domain Event vs. E
 
 ## Faz 6 — Üretime Hazırlık / Cilalama
 
-- [ ] **CI/CD** — build + test pipeline (GitHub Actions), WMS'te de önerilip başlanmamıştı, bu projede en azından PR başına build+test çalıştırılması hedefleniyor.
+- [x] **CI/CD** — `.github/workflows/ci.yml`, `pull_request`/`push` (main) tetikleyicili, üç paralel job: `backend` (`ECommercePlatform.slnx`), `payment-service` (`PaymentService.slnx`), `frontend` (`tsc --noEmit` → `lint` → `test` → `build`). Path filtreleme veya servis container'ı (Postgres/RabbitMQ) bilinçli olarak eklenmedi — bugün üç birimin de testleri tamamen unit test (Moq tabanlı, dış bağımlılıksız) ve portföy projesinin düşük PR hacminde path filtreleme gereksiz karmaşıklık; ikisi de entegrasyon testleri eklendiğinde (aşağıdaki madde) yeniden değerlendirilebilir.
 - [ ] **Test kapsamını genişlet** — her modül için Identity'dekine benzer unit test kapsamı (handler testleri), en az Order ve Payment için entegrasyon testleri (Testcontainers ile gerçek Postgres).
 - [ ] **Deploy** — Hetzner'deki kendi sunucumuza deploy edilecek (kesinleşti). Docker Compose'un yeterli olup olmadığına karar ver (Kubernetes şimdilik "gereksiz rabbit hole" olarak değerlendirildi). Faz 6 bitip MVP hazır olunca yayına alınır — Faz 7 (iyzico) bundan sonra, opsiyonel olarak ele alınır.
 
