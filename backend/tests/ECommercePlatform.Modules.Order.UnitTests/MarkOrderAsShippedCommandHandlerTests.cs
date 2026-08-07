@@ -1,46 +1,46 @@
-using ECommercePlatform.Modules.Inventory.Application.StockItems;
 using ECommercePlatform.Modules.Order.Application.Abstractions;
 using ECommercePlatform.Modules.Order.Application.Orders;
 using ECommercePlatform.Modules.Order.Domain;
 using ECommercePlatform.SharedKernel;
-using MediatR;
 using Moq;
 
 namespace ECommercePlatform.Modules.Order.UnitTests;
 
-public sealed class MarkOrderAsPaidCommandHandlerTests
+public sealed class MarkOrderAsShippedCommandHandlerTests
 {
     private readonly Mock<IOrderWriteRepository> _orderWriteRepository = new();
-    private readonly Mock<ISender> _sender = new();
-    private readonly MarkOrderAsPaidCommandHandler _handler;
+    private readonly MarkOrderAsShippedCommandHandler _handler;
 
-    public MarkOrderAsPaidCommandHandlerTests()
+    public MarkOrderAsShippedCommandHandlerTests()
     {
-        _handler = new MarkOrderAsPaidCommandHandler(_orderWriteRepository.Object, _sender.Object);
+        _handler = new MarkOrderAsShippedCommandHandler(_orderWriteRepository.Object);
     }
 
-    [Fact]
-    public async Task Handle_ShouldCommitReservedStock_WhenOrderIsMarkedPaid()
+    private static Domain.Order CreatePreparingOrder()
     {
-        var variantId = Guid.NewGuid();
-        var items = new List<OrderItemSnapshot> { new(variantId, "Telefon", "SKU-1", 100m, 3) };
+        var items = new List<OrderItemSnapshot> { new(Guid.NewGuid(), "Telefon", "SKU-1", 100m, 1) };
         var order = Domain.Order.Create(
             Guid.NewGuid(), "Ayşe Yılmaz", "5551234567", "İstanbul", "Kadıköy", "Bir sokak No:1", "34000", items);
         order.MarkReadyForPayment();
+        order.MarkAsPaid();
+        order.MarkAsPreparing();
 
+        return order;
+    }
+
+    [Fact]
+    public async Task Handle_ShouldMarkAsShipped_WhenOrderIsPreparing()
+    {
+        var order = CreatePreparingOrder();
         _orderWriteRepository
             .Setup(r => r.GetByIdWithItemsAsync(order.Id, It.IsAny<CancellationToken>()))
             .ReturnsAsync(order);
 
-        var result = await _handler.Handle(new MarkOrderAsPaidCommand(order.Id), CancellationToken.None);
+        var result = await _handler.Handle(new MarkOrderAsShippedCommand(order.Id), CancellationToken.None);
 
         Assert.True(result.IsSuccess);
-        Assert.Equal(OrderStatus.Paid, order.Status);
-        _sender.Verify(
-            s => s.Send(
-                It.Is<CommitStockCommand>(c => c.Items.Single().ProductVariantId == variantId && c.Items.Single().Quantity == 3),
-                It.IsAny<CancellationToken>()),
-            Times.Once);
+        Assert.Equal(OrderStatus.Shipped, order.Status);
+        _orderWriteRepository.Verify(r => r.SaveChangesAsync(It.IsAny<CancellationToken>()), Times.Once);
     }
 
     [Fact]
@@ -51,29 +51,29 @@ public sealed class MarkOrderAsPaidCommandHandlerTests
             .Setup(r => r.GetByIdWithItemsAsync(orderId, It.IsAny<CancellationToken>()))
             .ReturnsAsync((Domain.Order?)null);
 
-        var result = await _handler.Handle(new MarkOrderAsPaidCommand(orderId), CancellationToken.None);
+        var result = await _handler.Handle(new MarkOrderAsShippedCommand(orderId), CancellationToken.None);
 
         Assert.True(result.IsFailure);
         Assert.Equal(ErrorType.NotFound, result.Error.Type);
-        _sender.Verify(s => s.Send(It.IsAny<CommitStockCommand>(), It.IsAny<CancellationToken>()), Times.Never);
     }
 
     [Fact]
-    public async Task Handle_ShouldReturnConflictWithoutSavingOrCommitting_WhenOrderIsNotPaymentPending()
+    public async Task Handle_ShouldReturnConflictWithoutSaving_WhenOrderIsNotPreparing()
     {
         var items = new List<OrderItemSnapshot> { new(Guid.NewGuid(), "Telefon", "SKU-1", 100m, 1) };
         var order = Domain.Order.Create(
             Guid.NewGuid(), "Ayşe Yılmaz", "5551234567", "İstanbul", "Kadıköy", "Bir sokak No:1", "34000", items);
+        order.MarkReadyForPayment();
+        order.MarkAsPaid();
 
         _orderWriteRepository
             .Setup(r => r.GetByIdWithItemsAsync(order.Id, It.IsAny<CancellationToken>()))
             .ReturnsAsync(order);
 
-        var result = await _handler.Handle(new MarkOrderAsPaidCommand(order.Id), CancellationToken.None);
+        var result = await _handler.Handle(new MarkOrderAsShippedCommand(order.Id), CancellationToken.None);
 
         Assert.True(result.IsFailure);
         Assert.Equal(ErrorType.Conflict, result.Error.Type);
         _orderWriteRepository.Verify(r => r.SaveChangesAsync(It.IsAny<CancellationToken>()), Times.Never);
-        _sender.Verify(s => s.Send(It.IsAny<CommitStockCommand>(), It.IsAny<CancellationToken>()), Times.Never);
     }
 }

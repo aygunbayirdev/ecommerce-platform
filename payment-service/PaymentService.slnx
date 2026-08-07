@@ -14,7 +14,10 @@
     <Project Path="src/Modules/Payment/ECommercePlatform.Modules.Payment.Application/ECommercePlatform.Modules.Payment.Application.csproj" />
     <Project Path="src/Modules/Payment/ECommercePlatform.Modules.Payment.Infrastructure/ECommercePlatform.Modules.Payment.Infrastructure.csproj" />
   </Folder>
+  <Folder Name="/src/Modules/" />
+  <Folder Name="/src/Modules/Payment/" />
   <Folder Name="/tests/">
+    <Project Path="tests/ECommercePlatform.Modules.Payment.IntegrationTests/ECommercePlatform.Modules.Payment.IntegrationTests.csproj" />
     <Project Path="tests/ECommercePlatform.Modules.Payment.UnitTests/ECommercePlatform.Modules.Payment.UnitTests.csproj" />
   </Folder>
 </Solution>

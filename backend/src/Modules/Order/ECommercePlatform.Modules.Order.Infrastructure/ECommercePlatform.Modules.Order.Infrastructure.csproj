@@ -9,6 +9,13 @@
   </ItemGroup>
 
   <ItemGroup>
+    <!-- Lets Order.IntegrationTests construct OrderWriteRepository/OrderReadRepository directly
+         (both internal — DI is how the real app wires them, but that path also drags in RabbitMQ/
+         MediatR registration, which these Postgres-only integration tests deliberately avoid). -->
+    <InternalsVisibleTo Include="ECommercePlatform.Modules.Order.IntegrationTests" />
+  </ItemGroup>
+
+  <ItemGroup>
     <PackageReference Include="Dapper" />
     <PackageReference Include="EFCore.NamingConventions" />
     <PackageReference Include="Microsoft.EntityFrameworkCore" />

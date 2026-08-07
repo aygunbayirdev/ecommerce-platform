@@ -151,4 +151,16 @@ public sealed class CouponTests
         Assert.True(result.IsFailure);
         Assert.Equal(ErrorType.Conflict, result.Error.Type);
     }
+
+    [Fact]
+    public void Deactivate_ShouldReturnConflict_WhenCouponAlreadyInactive()
+    {
+        var coupon = CreateCoupon();
+        coupon.Deactivate();
+
+        var result = coupon.Deactivate();
+
+        Assert.True(result.IsFailure);
+        Assert.Equal(ErrorType.Conflict, result.Error.Type);
+    }
 }

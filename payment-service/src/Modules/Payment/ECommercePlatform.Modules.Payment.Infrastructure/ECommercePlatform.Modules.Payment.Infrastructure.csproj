@@ -9,6 +9,13 @@
   </ItemGroup>
 
   <ItemGroup>
+    <!-- Lets Payment.IntegrationTests construct PaymentWriteRepository/PaymentReadRepository directly
+         (both internal — DI is how the real service wires them, but that path also drags in RabbitMQ/
+         MediatR registration, which these Postgres-only integration tests deliberately avoid). -->
+    <InternalsVisibleTo Include="ECommercePlatform.Modules.Payment.IntegrationTests" />
+  </ItemGroup>
+
+  <ItemGroup>
     <PackageReference Include="Dapper" />
     <PackageReference Include="EFCore.NamingConventions" />
     <PackageReference Include="Microsoft.EntityFrameworkCore" />

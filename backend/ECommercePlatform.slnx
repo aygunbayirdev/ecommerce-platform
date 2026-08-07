@@ -34,10 +34,13 @@
     <Project Path="src/Modules/Shipping/ECommercePlatform.Modules.Shipping.Infrastructure/ECommercePlatform.Modules.Shipping.Infrastructure.csproj" />
     <Project Path="tests/ECommercePlatform.Modules.Identity.UnitTests/ECommercePlatform.Modules.Identity.UnitTests.csproj" />
   </Folder>
+  <Folder Name="/src/Modules/" />
+  <Folder Name="/src/Modules/Order/" />
   <Folder Name="/tests/">
     <Project Path="tests/ECommercePlatform.Modules.Cart.UnitTests/ECommercePlatform.Modules.Cart.UnitTests.csproj" />
     <Project Path="tests/ECommercePlatform.Modules.Catalog.UnitTests/ECommercePlatform.Modules.Catalog.UnitTests.csproj" />
     <Project Path="tests/ECommercePlatform.Modules.Inventory.UnitTests/ECommercePlatform.Modules.Inventory.UnitTests.csproj" />
+    <Project Path="tests/ECommercePlatform.Modules.Order.IntegrationTests/ECommercePlatform.Modules.Order.IntegrationTests.csproj" />
     <Project Path="tests/ECommercePlatform.Modules.Order.UnitTests/ECommercePlatform.Modules.Order.UnitTests.csproj" />
     <Project Path="tests/ECommercePlatform.Modules.Promotion.UnitTests/ECommercePlatform.Modules.Promotion.UnitTests.csproj" />
     <Project Path="tests/ECommercePlatform.Modules.Review.UnitTests/ECommercePlatform.Modules.Review.UnitTests.csproj" />
