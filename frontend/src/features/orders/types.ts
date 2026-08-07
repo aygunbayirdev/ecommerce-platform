@@ -14,6 +14,7 @@ export type OrderItem = {
   unitPrice: number
   quantity: number
   lineTotal: number
+  productId: string
 }
 
 export type OrderStatusHistoryEntry = {

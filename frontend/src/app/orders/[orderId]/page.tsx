@@ -7,6 +7,7 @@ import { CancelOrderDialog } from '@/components/orders/CancelOrderDialog'
 import { OrderStatusHistoryTimeline } from '@/components/orders/OrderStatusHistoryTimeline'
 import { ShipmentInfo } from '@/components/orders/ShipmentInfo'
 import { OrderItemsList } from '@/components/checkout/OrderItemsList'
+import { ReviewFormDialog } from '@/components/reviews/ReviewFormDialog'
 import { Badge } from '@/components/ui/badge'
 import { Button } from '@/components/ui/button'
 import { Separator } from '@/components/ui/separator'
@@ -102,6 +103,34 @@ export default function OrderDetailPage() {
         <h2 className="text-base font-semibold">Kargo Takibi</h2>
         <ShipmentInfo shipment={shipment} />
       </section>
+
+      {order.status === 'Delivered' && (
+        <>
+          <Separator />
+          <section className="space-y-3">
+            <h2 className="text-base font-semibold">Ürünleri Değerlendir</h2>
+            <ul className="space-y-2">
+              {Array.from(new Map(order.items.map((item) => [item.productId, item])).values()).map(
+                (item) => (
+                  <li key={item.productId} className="flex items-center justify-between gap-4 rounded-lg border p-3">
+                    <span className="text-sm">{item.productName}</span>
+                    <ReviewFormDialog
+                      productId={item.productId}
+                      orderId={order.id}
+                      productName={item.productName}
+                      trigger={
+                        <Button type="button" variant="outline" size="sm">
+                          Yorum Yap
+                        </Button>
+                      }
+                    />
+                  </li>
+                ),
+              )}
+            </ul>
+          </section>
+        </>
+      )}
     </div>
   )
 }

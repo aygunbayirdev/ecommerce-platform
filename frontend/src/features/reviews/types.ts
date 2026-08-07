@@ -8,3 +8,10 @@ export type Review = {
   isApproved: boolean
   createdAtUtc: string
 }
+
+export type CreateReviewRequest = {
+  productId: string
+  orderId: string
+  rating: number
+  comment: string
+}

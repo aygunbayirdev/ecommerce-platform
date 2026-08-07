@@ -6,4 +6,5 @@ public sealed record OrderItemDto(
     string Sku,
     decimal UnitPrice,
     int Quantity,
-    decimal LineTotal);
+    decimal LineTotal,
+    Guid ProductId = default);

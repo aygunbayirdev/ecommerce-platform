@@ -44,7 +44,8 @@ internal sealed class OrderReadRepository(ISqlConnectionFactory connectionFactor
 
             SELECT
                 product_variant_id AS "ProductVariantId", product_name AS "ProductName", sku AS "Sku",
-                unit_price AS "UnitPrice", quantity AS "Quantity", (unit_price * quantity) AS "LineTotal"
+                unit_price AS "UnitPrice", quantity AS "Quantity", (unit_price * quantity) AS "LineTotal",
+                NULL::uuid AS "ProductId"
             FROM "order".order_items
             WHERE order_id = @Id;
 

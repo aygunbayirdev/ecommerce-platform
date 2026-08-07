@@ -10,6 +10,9 @@
     <ProjectReference Include="..\..\Identity\ECommercePlatform.Modules.Identity.Application\ECommercePlatform.Modules.Identity.Application.csproj" />
     <ProjectReference Include="..\..\Inventory\ECommercePlatform.Modules.Inventory.Application\ECommercePlatform.Modules.Inventory.Application.csproj" />
     <ProjectReference Include="..\..\Promotion\ECommercePlatform.Modules.Promotion.Application\ECommercePlatform.Modules.Promotion.Application.csproj" />
+    <!-- GetOrderByIdQueryHandler resolves each item's ProductId from its ProductVariantId via
+         GetProductVariantSummariesQuery — same cross-module read composition Cart already uses. -->
+    <ProjectReference Include="..\..\Catalog\ECommercePlatform.Modules.Catalog.Application\ECommercePlatform.Modules.Catalog.Application.csproj" />
   </ItemGroup>
 
   <PropertyGroup>
