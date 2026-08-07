@@ -42,6 +42,10 @@ jobs:
           cache: npm
           cache-dependency-path: frontend/package-lock.json
       - run: npm ci
+      # LayoutProps/PageProps and other route-typing globals only exist once Next has generated
+      # them (normally a side effect of `next dev`/`next build`) — a fresh CI checkout has no
+      # .next/ yet, so tsc needs this run first or it fails with "Cannot find name 'LayoutProps'".
+      - run: npx next typegen
       - run: npx tsc --noEmit
       - run: npm run lint
       - run: npm run test
