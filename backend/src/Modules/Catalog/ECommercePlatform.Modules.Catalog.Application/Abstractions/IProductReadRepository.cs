@@ -7,8 +7,12 @@ public interface IProductReadRepository
 {
     Task<ProductDetailDto?> GetByIdAsync(Guid id, CancellationToken cancellationToken);
 
-    /// <summary>Pass a null categoryId for the unfiltered "all products" listing (the public homepage grid).</summary>
+    /// <summary>Pass a null categoryId for the unfiltered "all products" listing (the public homepage grid). Only returns active products.</summary>
     Task<PagedResult<ProductSummaryDto>> GetAsync(
+        Guid? categoryId, int pageNumber, int pageSize, CancellationToken cancellationToken);
+
+    /// <summary>Admin listing — unlike GetAsync, does NOT filter to active-only (admin needs to see and reactivate inactive products).</summary>
+    Task<PagedResult<ProductSummaryDto>> GetAllForAdminAsync(
         Guid? categoryId, int pageNumber, int pageSize, CancellationToken cancellationToken);
 
     /// <summary>Used by other modules (e.g. Cart) to enrich a list of variant ids with live product name/price/image data.</summary>

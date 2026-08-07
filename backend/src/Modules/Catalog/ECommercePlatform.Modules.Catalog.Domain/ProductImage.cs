@@ -31,4 +31,6 @@ public sealed class ProductImage : BaseEntity
     }
 
     internal void UnmarkAsPrimary() => IsPrimary = false;
+
+    internal void MarkAsPrimary() => IsPrimary = true;
 }

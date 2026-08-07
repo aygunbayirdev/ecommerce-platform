@@ -7,6 +7,19 @@ export type Category = {
   createdAtUtc: string
 }
 
+export type Brand = {
+  id: string
+  name: string
+  isActive: boolean
+  createdAtUtc: string
+}
+
+export type ProductAttribute = {
+  id: string
+  name: string
+  createdAtUtc: string
+}
+
 export type ProductSummary = {
   id: string
   name: string
@@ -48,6 +61,11 @@ export type ProductDetail = {
   createdAtUtc: string
   variants: ProductVariant[]
   images: ProductImage[]
+}
+
+export type ProductVariantAttributeValueInput = {
+  productAttributeId: string
+  value: string
 }
 
 export type PagedResult<T> = {

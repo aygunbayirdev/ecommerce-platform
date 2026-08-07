@@ -35,6 +35,21 @@ public sealed class ProductsController(ISender sender) : ControllerBase
         return result.IsSuccess ? Ok(result.Value) : result.ToProblemDetails();
     }
 
+    // Admin-only counterpart to GetAll — includes inactive products so they can be found and
+    // reactivated (the public listing above deliberately excludes them).
+    [HttpGet("all")]
+    [Authorize(Roles = "Admin")]
+    public async Task<IActionResult> GetAllForAdmin(
+        [FromQuery] Guid? categoryId,
+        [FromQuery] int pageNumber = 1,
+        [FromQuery] int pageSize = 20,
+        CancellationToken cancellationToken = default)
+    {
+        var result = await sender.Send(new GetAllProductsForAdminQuery(categoryId, pageNumber, pageSize), cancellationToken);
+
+        return result.IsSuccess ? Ok(result.Value) : result.ToProblemDetails();
+    }
+
     [HttpPost]
     [Authorize(Roles = "Admin")]
     public async Task<IActionResult> Create(CreateProductCommand command, CancellationToken cancellationToken)
@@ -70,5 +85,50 @@ public sealed class ProductsController(ISender sender) : ControllerBase
         return result.IsSuccess
             ? CreatedAtAction(nameof(GetById), new { productId }, new { id = result.Value })
             : result.ToProblemDetails();
+    }
+
+    [HttpPost("{productId:guid}/deactivate")]
+    [Authorize(Roles = "Admin")]
+    public async Task<IActionResult> Deactivate(Guid productId, CancellationToken cancellationToken)
+    {
+        var result = await sender.Send(new DeactivateProductCommand(productId), cancellationToken);
+
+        return result.IsSuccess ? NoContent() : result.ToProblemDetails();
+    }
+
+    [HttpPost("{productId:guid}/reactivate")]
+    [Authorize(Roles = "Admin")]
+    public async Task<IActionResult> Reactivate(Guid productId, CancellationToken cancellationToken)
+    {
+        var result = await sender.Send(new ReactivateProductCommand(productId), cancellationToken);
+
+        return result.IsSuccess ? NoContent() : result.ToProblemDetails();
+    }
+
+    [HttpPost("{productId:guid}/variants/{variantId:guid}/deactivate")]
+    [Authorize(Roles = "Admin")]
+    public async Task<IActionResult> DeactivateVariant(Guid productId, Guid variantId, CancellationToken cancellationToken)
+    {
+        var result = await sender.Send(new DeactivateProductVariantCommand(productId, variantId), cancellationToken);
+
+        return result.IsSuccess ? NoContent() : result.ToProblemDetails();
+    }
+
+    [HttpPost("{productId:guid}/variants/{variantId:guid}/reactivate")]
+    [Authorize(Roles = "Admin")]
+    public async Task<IActionResult> ReactivateVariant(Guid productId, Guid variantId, CancellationToken cancellationToken)
+    {
+        var result = await sender.Send(new ReactivateProductVariantCommand(productId, variantId), cancellationToken);
+
+        return result.IsSuccess ? NoContent() : result.ToProblemDetails();
+    }
+
+    [HttpDelete("{productId:guid}/images/{imageId:guid}")]
+    [Authorize(Roles = "Admin")]
+    public async Task<IActionResult> RemoveImage(Guid productId, Guid imageId, CancellationToken cancellationToken)
+    {
+        var result = await sender.Send(new RemoveProductImageCommand(productId, imageId), cancellationToken);
+
+        return result.IsSuccess ? NoContent() : result.ToProblemDetails();
     }
 }

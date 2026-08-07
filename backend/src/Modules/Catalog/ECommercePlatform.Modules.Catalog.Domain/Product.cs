@@ -71,4 +71,87 @@ public sealed class Product : BaseEntity
 
         return newImage;
     }
+
+    public Result Deactivate()
+    {
+        if (!IsActive)
+        {
+            return Result.Failure(Error.Conflict("Products.AlreadyInactive", "Ürün zaten pasif durumda."));
+        }
+
+        IsActive = false;
+
+        return Result.Success();
+    }
+
+    public Result Reactivate()
+    {
+        if (IsActive)
+        {
+            return Result.Failure(Error.Conflict("Products.AlreadyActive", "Ürün zaten aktif durumda."));
+        }
+
+        IsActive = true;
+
+        return Result.Success();
+    }
+
+    public Result DeactivateVariant(Guid variantId)
+    {
+        var variant = _variants.FirstOrDefault(v => v.Id == variantId);
+
+        if (variant is null)
+        {
+            return Result.Failure(Error.NotFound("Products.VariantNotFound", "Varyant bulunamadı."));
+        }
+
+        if (!variant.IsActive)
+        {
+            return Result.Failure(Error.Conflict("Products.VariantAlreadyInactive", "Varyant zaten pasif durumda."));
+        }
+
+        variant.Deactivate();
+
+        return Result.Success();
+    }
+
+    public Result ReactivateVariant(Guid variantId)
+    {
+        var variant = _variants.FirstOrDefault(v => v.Id == variantId);
+
+        if (variant is null)
+        {
+            return Result.Failure(Error.NotFound("Products.VariantNotFound", "Varyant bulunamadı."));
+        }
+
+        if (variant.IsActive)
+        {
+            return Result.Failure(Error.Conflict("Products.VariantAlreadyActive", "Varyant zaten aktif durumda."));
+        }
+
+        variant.Reactivate();
+
+        return Result.Success();
+    }
+
+    public Result RemoveImage(Guid imageId)
+    {
+        var image = _images.FirstOrDefault(i => i.Id == imageId);
+
+        if (image is null)
+        {
+            return Result.Failure(Error.NotFound("Products.ImageNotFound", "Görsel bulunamadı."));
+        }
+
+        var wasPrimary = image.IsPrimary;
+        _images.Remove(image);
+
+        // Preserve AddImage's invariant: if any images remain, exactly one must be primary.
+        if (wasPrimary && _images.Count > 0 && !_images.Any(i => i.IsPrimary))
+        {
+            _images.OrderBy(i => i.DisplayOrder).First().MarkAsPrimary();
+        }
+
+        return Result.Success();
+    }
 }

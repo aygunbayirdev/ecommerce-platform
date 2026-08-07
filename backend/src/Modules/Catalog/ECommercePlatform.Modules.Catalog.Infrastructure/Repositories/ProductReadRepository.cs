@@ -130,6 +130,49 @@ internal sealed class ProductReadRepository(ISqlConnectionFactory connectionFact
         };
     }
 
+    public async Task<PagedResult<ProductSummaryDto>> GetAllForAdminAsync(
+        Guid? categoryId, int pageNumber, int pageSize, CancellationToken cancellationToken)
+    {
+        const string sql = """
+            SELECT COUNT(*)
+            FROM catalog.products p
+            WHERE (@CategoryId::uuid IS NULL OR p.category_id = @CategoryId);
+
+            SELECT
+                p.id AS "Id",
+                p.name AS "Name",
+                p.category_id AS "CategoryId",
+                p.brand_id AS "BrandId",
+                (SELECT MIN(pv.price) FROM catalog.product_variants pv WHERE pv.product_id = p.id) AS "MinPrice",
+                (SELECT pi.url FROM catalog.product_images pi WHERE pi.product_id = p.id AND pi.is_primary = true LIMIT 1) AS "PrimaryImageUrl",
+                p.is_active AS "IsActive"
+            FROM catalog.products p
+            WHERE (@CategoryId::uuid IS NULL OR p.category_id = @CategoryId)
+            ORDER BY p.created_at_utc DESC
+            LIMIT @PageSize OFFSET @Offset;
+            """;
+
+        using IDbConnection connection = connectionFactory.CreateConnection();
+
+        var command = new CommandDefinition(
+            sql,
+            new { CategoryId = categoryId, PageSize = pageSize, Offset = (pageNumber - 1) * pageSize },
+            cancellationToken: cancellationToken);
+
+        using var multi = await connection.QueryMultipleAsync(command);
+
+        var totalCount = await multi.ReadSingleAsync<int>();
+        var items = (await multi.ReadAsync<ProductSummaryDto>()).ToList();
+
+        return new PagedResult<ProductSummaryDto>
+        {
+            Items = items,
+            PageNumber = pageNumber,
+            PageSize = pageSize,
+            TotalCount = totalCount,
+        };
+    }
+
     public async Task<IReadOnlyList<ProductVariantSummaryDto>> GetVariantSummariesAsync(
         IReadOnlyList<Guid> productVariantIds, CancellationToken cancellationToken)
     {
@@ -140,7 +183,7 @@ internal sealed class ProductReadRepository(ISqlConnectionFactory connectionFact
                 pv.sku AS "Sku",
                 pv.price AS "Price",
                 (SELECT pi.url FROM catalog.product_images pi WHERE pi.product_id = p.id AND pi.is_primary = true LIMIT 1) AS "ImageUrl",
-                pv.is_active AS "IsActive",
+                (pv.is_active AND p.is_active) AS "IsActive",
                 p.id AS "ProductId"
             FROM catalog.product_variants pv
             JOIN catalog.products p ON p.id = pv.product_id

@@ -38,6 +38,10 @@ public sealed class ProductVariant : BaseEntity
         return variant;
     }
 
+    internal void Deactivate() => IsActive = false;
+
+    internal void Reactivate() => IsActive = true;
+
     internal void SetAttributeValue(Guid productAttributeId, string value)
     {
         var existing = _attributeValues.FirstOrDefault(v => v.ProductAttributeId == productAttributeId);
