@@ -5,6 +5,7 @@ using ECommercePlatform.Modules.Identity.Application.Abstractions;
 using ECommercePlatform.Modules.Identity.Infrastructure.Persistence;
 using ECommercePlatform.Modules.Identity.Infrastructure.Repositories;
 using ECommercePlatform.Modules.Identity.Infrastructure.Security;
+using ECommercePlatform.Modules.Identity.Infrastructure.Seeding;
 using FluentValidation;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
@@ -39,6 +40,8 @@ public static class IdentityModule
         services.AddValidatorsFromAssembly(typeof(IdentityApplicationAssemblyMarker).Assembly);
 
         services.AddOutboxProcessor<IdentityDbContext>();
+
+        services.Configure<AdminSeedOptions>(configuration.GetSection(AdminSeedOptions.SectionName));
 
         return services;
     }

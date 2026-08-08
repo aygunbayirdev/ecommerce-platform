@@ -1,4 +1,5 @@
 using System.Text;
+using ECommercePlatform.Api.Seeding;
 using ECommercePlatform.BuildingBlocks.Application;
 using ECommercePlatform.BuildingBlocks.Infrastructure;
 using ECommercePlatform.BuildingBlocks.Infrastructure.Security;
@@ -9,6 +10,7 @@ using ECommercePlatform.Modules.Catalog.Infrastructure;
 using ECommercePlatform.Modules.Catalog.Infrastructure.Persistence;
 using ECommercePlatform.Modules.Identity.Infrastructure;
 using ECommercePlatform.Modules.Identity.Infrastructure.Persistence;
+using ECommercePlatform.Modules.Identity.Infrastructure.Seeding;
 using ECommercePlatform.Modules.Inventory.Infrastructure;
 using ECommercePlatform.Modules.Inventory.Infrastructure.Persistence;
 using ECommercePlatform.Modules.Order.Infrastructure;
@@ -138,6 +140,22 @@ using (var scope = app.Services.CreateScope())
     await services.GetRequiredService<ReviewDbContext>().Database.MigrateAsync();
 }
 
-app.Run();
+await IdentitySeeder.SeedAsync(app.Services);
+
+if (app.Configuration.GetValue("Seeding:SeedDemoData", true))
+{
+    // Uses Start/WaitForShutdown instead of Run() so the per-module OutboxProcessor hosted
+    // services (started as part of StartAsync) are already polling before seeding runs — the
+    // seeder's product variants/orders/etc. raise domain events that only reach Inventory through
+    // the outbox relay now, so it needs that relay actually running, not just registered
+    // (mirrors WMS's WMS.Api/Program.cs).
+    await app.StartAsync();
+    await DemoDataSeeder.SeedAsync(app.Services);
+    await app.WaitForShutdownAsync();
+}
+else
+{
+    app.Run();
+}
 
 public partial class Program;
