@@ -4,14 +4,23 @@ using ECommercePlatform.BuildingBlocks.Infrastructure;
 using ECommercePlatform.BuildingBlocks.Infrastructure.Security;
 using ECommercePlatform.BuildingBlocks.Messaging;
 using ECommercePlatform.Modules.Cart.Infrastructure;
+using ECommercePlatform.Modules.Cart.Infrastructure.Persistence;
 using ECommercePlatform.Modules.Catalog.Infrastructure;
+using ECommercePlatform.Modules.Catalog.Infrastructure.Persistence;
 using ECommercePlatform.Modules.Identity.Infrastructure;
+using ECommercePlatform.Modules.Identity.Infrastructure.Persistence;
 using ECommercePlatform.Modules.Inventory.Infrastructure;
+using ECommercePlatform.Modules.Inventory.Infrastructure.Persistence;
 using ECommercePlatform.Modules.Order.Infrastructure;
+using ECommercePlatform.Modules.Order.Infrastructure.Persistence;
 using ECommercePlatform.Modules.Promotion.Infrastructure;
+using ECommercePlatform.Modules.Promotion.Infrastructure.Persistence;
 using ECommercePlatform.Modules.Review.Infrastructure;
+using ECommercePlatform.Modules.Review.Infrastructure.Persistence;
 using ECommercePlatform.Modules.Shipping.Infrastructure;
+using ECommercePlatform.Modules.Shipping.Infrastructure.Persistence;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
+using Microsoft.EntityFrameworkCore;
 using Microsoft.IdentityModel.Tokens;
 
 var builder = WebApplication.CreateBuilder(args);
@@ -111,6 +120,23 @@ app.UseAuthentication();
 app.UseAuthorization();
 
 app.MapControllers();
+
+// Every module owns its own DbContext/schema (bkz. CLAUDE.md §1), so each one needs its own
+// migration call — this makes `docker compose up` against a fresh, empty Postgres volume produce
+// a fully-migrated database without a separate manual `dotnet ef database update` step per module
+// (mirrors WMS's WMS.Api/Program.cs).
+using (var scope = app.Services.CreateScope())
+{
+    var services = scope.ServiceProvider;
+    await services.GetRequiredService<IdentityDbContext>().Database.MigrateAsync();
+    await services.GetRequiredService<CatalogDbContext>().Database.MigrateAsync();
+    await services.GetRequiredService<InventoryDbContext>().Database.MigrateAsync();
+    await services.GetRequiredService<CartDbContext>().Database.MigrateAsync();
+    await services.GetRequiredService<OrderDbContext>().Database.MigrateAsync();
+    await services.GetRequiredService<ShippingDbContext>().Database.MigrateAsync();
+    await services.GetRequiredService<PromotionDbContext>().Database.MigrateAsync();
+    await services.GetRequiredService<ReviewDbContext>().Database.MigrateAsync();
+}
 
 app.Run();
 

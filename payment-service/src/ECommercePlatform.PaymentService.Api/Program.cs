@@ -4,7 +4,9 @@ using ECommercePlatform.BuildingBlocks.Infrastructure;
 using ECommercePlatform.BuildingBlocks.Infrastructure.Security;
 using ECommercePlatform.BuildingBlocks.Messaging;
 using ECommercePlatform.Modules.Payment.Infrastructure;
+using ECommercePlatform.Modules.Payment.Infrastructure.Persistence;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
+using Microsoft.EntityFrameworkCore;
 using Microsoft.IdentityModel.Tokens;
 
 var builder = WebApplication.CreateBuilder(args);
@@ -94,6 +96,12 @@ app.UseAuthentication();
 app.UseAuthorization();
 
 app.MapControllers();
+
+// See backend/src/ECommercePlatform.Api/Program.cs for why this is needed on a fresh deploy.
+using (var scope = app.Services.CreateScope())
+{
+    await scope.ServiceProvider.GetRequiredService<PaymentDbContext>().Database.MigrateAsync();
+}
 
 app.Run();
 
