@@ -66,53 +66,55 @@ public static class DemoDataSeeder
         // --- Catalog: products + variants + stock -------------------------------
         // Image keywords are matched to each product on purpose (LoremFlickr returns a real Flickr
         // photo for the given keyword, no API key needed) so a reviewer sees an actual headphone
-        // photo on the headphones, not an unrelated landscape placeholder.
+        // photo on the headphones, not an unrelated landscape placeholder. Each also gets a fixed
+        // `lock` number — without it LoremFlickr picks a new random photo from the keyword's pool
+        // on every request, so the product image would change on every page refresh.
         var kulaklik = await CreateProductAsync(sender, bilgisayarAksesuar, technova, "Kablosuz Bluetooth Kulaklık",
-            "Aktif gürültü engelleme özellikli, 30 saat pil ömürlü kablosuz kulaklık.", "headphones",
+            "Aktif gürültü engelleme özellikli, 30 saat pil ömürlü kablosuz kulaklık.", "headphones", 1,
             [new VariantSeed("ELK-001", 899.90m, [], 60)], cancellationToken);
         var saat = await CreateProductAsync(sender, bilgisayarAksesuar, technova, "Akıllı Saat",
-            "Nabız ve uyku takibi, bildirim aynalama özellikli akıllı saat.", "smartwatch",
+            "Nabız ve uyku takibi, bildirim aynalama özellikli akıllı saat.", "smartwatch", 2,
             [new VariantSeed("ELK-002", 1499.90m, [], 35)], cancellationToken);
         await CreateProductAsync(sender, bilgisayarAksesuar, technova, "Mekanik Klavye",
-            "Hot-swap anahtarlı, RGB aydınlatmalı mekanik oyuncu klavyesi.", "mechanical-keyboard",
+            "Hot-swap anahtarlı, RGB aydınlatmalı mekanik oyuncu klavyesi.", "mechanical-keyboard", 3,
             [new VariantSeed("ELK-003", 1299.00m, [], 25)], cancellationToken);
         var mouse = await CreateProductAsync(sender, bilgisayarAksesuar, technova, "Kablosuz Mouse",
-            "Sessiz tıklamalı, ergonomik kablosuz mouse.", "computer-mouse",
+            "Sessiz tıklamalı, ergonomik kablosuz mouse.", "computer-mouse", 4,
             [new VariantSeed("ELK-004", 349.90m, [], 80)], cancellationToken);
         await CreateProductAsync(sender, bilgisayarAksesuar, urbanWear, "Laptop Sırt Çantası",
-            "Su geçirmez kumaştan, 15.6 inç laptop bölmeli sırt çantası.", "backpack",
+            "Su geçirmez kumaştan, 15.6 inç laptop bölmeli sırt çantası.", "backpack", 5,
             [new VariantSeed("AKS-001", 799.00m, [], 40)], cancellationToken);
         await CreateProductAsync(sender, sporOutdoor, urbanWear, "Erkek Spor Ayakkabı",
-            "Nefes alabilir file üst yüzeyli, hafif taban spor ayakkabı.", "sneakers",
+            "Nefes alabilir file üst yüzeyli, hafif taban spor ayakkabı.", "sneakers", 6,
             [
                 new VariantSeed("SPR-001-40", 1199.00m, [(beden, "40")], 20),
                 new VariantSeed("SPR-001-42", 1199.00m, [(beden, "42")], 30),
                 new VariantSeed("SPR-001-44", 1199.00m, [(beden, "44")], 18),
             ], cancellationToken);
         var tisort = await CreateProductAsync(sender, giyim, urbanWear, "Kadın Basic Tişört",
-            "Pamuklu, regular kesim basic tişört.", "t-shirt",
+            "Pamuklu, regular kesim basic tişört.", "t-shirt", 7,
             [
                 new VariantSeed("GYM-001-WHT", 249.90m, [(renk, "Beyaz")], 50),
                 new VariantSeed("GYM-001-BLK", 249.90m, [(renk, "Siyah")], 50),
             ], cancellationToken);
         await CreateProductAsync(sender, giyim, urbanWear, "Erkek Kot Pantolon",
-            "Slim fit, esnek kumaşlı kot pantolon.", "jeans",
+            "Slim fit, esnek kumaşlı kot pantolon.", "jeans", 8,
             [
                 new VariantSeed("GYM-002-30", 599.00m, [(beden, "30")], 22),
                 new VariantSeed("GYM-002-32", 599.00m, [(beden, "32")], 28),
                 new VariantSeed("GYM-002-34", 599.00m, [(beden, "34")], 20),
             ], cancellationToken);
         await CreateProductAsync(sender, evYasam, homeCraft, "Kahve Makinesi",
-            "Otomatik öğütücülü, tam otomatik espresso makinesi.", "coffee-maker",
+            "Otomatik öğütücülü, tam otomatik espresso makinesi.", "coffee-maker", 9,
             [new VariantSeed("EV-001", 2199.00m, [], 15)], cancellationToken);
         await CreateProductAsync(sender, sporOutdoor, homeCraft, "Yoga Matı",
-            "Kaymaz yüzeyli, 6mm kalınlığında yoga matı.", "yoga-mat",
+            "Kaymaz yüzeyli, 6mm kalınlığında yoga matı.", "yoga-mat", 10,
             [
                 new VariantSeed("SPR-002-PUR", 349.00m, [(renk, "Mor")], 45),
                 new VariantSeed("SPR-002-GRY", 349.00m, [(renk, "Gri")], 45),
             ], cancellationToken);
         await CreateProductAsync(sender, evYasam, homeCraft, "Robot Süpürge",
-            "Haritalama özellikli, uygulamadan kontrol edilebilen robot süpürge.", "robot-vacuum",
+            "Haritalama özellikli, uygulamadan kontrol edilebilen robot süpürge.", "robot-vacuum", 11,
             [new VariantSeed("EV-002", 5499.00m, [], 12)], cancellationToken);
 
         // --- Promotion: kuponlar --------------------------------------------------
@@ -161,12 +163,13 @@ public static class DemoDataSeeder
         string name,
         string description,
         string imageKeyword,
+        int imageLock,
         IReadOnlyList<VariantSeed> variantSeeds,
         CancellationToken cancellationToken)
     {
         var productId = await SendForIdAsync(sender, new CreateProductCommand(categoryId, brandId, name, description), cancellationToken);
 
-        await SendForIdAsync(sender, new AddProductImageCommand(productId, $"https://loremflickr.com/640/480/{imageKeyword}", true), cancellationToken);
+        await SendForIdAsync(sender, new AddProductImageCommand(productId, $"https://loremflickr.com/640/480/{imageKeyword}?lock={imageLock}", true), cancellationToken);
 
         var variants = new List<Guid>();
 
