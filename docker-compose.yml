@@ -52,7 +52,9 @@ services:
       RabbitMq__Port: 5672
       RabbitMq__UserName: ${RABBITMQ_USER}
       RabbitMq__Password: ${RABBITMQ_PASSWORD}
-      ASPNETCORE_ENVIRONMENT: Development
+      # Defaults to Production for real deploys (see .env) — Development makes the CORS policy
+      # allow only loopback origins (Program.cs), which silently breaks CORS for any real host/IP.
+      ASPNETCORE_ENVIRONMENT: ${ASPNETCORE_ENVIRONMENT:-Production}
     ports:
       - "8080:8080"
 
@@ -95,7 +97,9 @@ services:
       RabbitMq__Port: 5672
       RabbitMq__UserName: ${RABBITMQ_USER}
       RabbitMq__Password: ${RABBITMQ_PASSWORD}
-      ASPNETCORE_ENVIRONMENT: Development
+      # Defaults to Production for real deploys (see .env) — Development makes the CORS policy
+      # allow only loopback origins (Program.cs), which silently breaks CORS for any real host/IP.
+      ASPNETCORE_ENVIRONMENT: ${ASPNETCORE_ENVIRONMENT:-Production}
     ports:
       - "8081:8080"
 
